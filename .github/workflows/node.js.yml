@@ -1,0 +1,32 @@
+name: Frontend React CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'npm'
+        
+    - run: npm ci
+
+    - name: Run ESLint and TypeScript check
+    - run: npm run lint
+
+    - name: Build Project
+    - run: npm run build
+
+    - name: Run Tests
+    - run: npm test
