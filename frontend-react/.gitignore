@@ -1,0 +1,25 @@
+# Dependencies
+/node_modules
+/yarn.lock
+/npm-debug.log*
+
+# Build Outputs (What the compiler generates)
+/dist
+/build
+/out
+
+# Runtime data
+.env
+.env.local
+
+# IDE/Editor specific files
+.vscode/
+.idea/
+*.swp
+*.bak
+.DS_Store
+
+# Vite/Vercel/Netlify specific files
+.vercel/
+.netlify/
+.cache/
