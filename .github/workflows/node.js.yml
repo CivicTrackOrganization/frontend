@@ -18,6 +18,10 @@ jobs:
       with:
         node-version: 24.x
         cache: 'npm'
+        cache-dependency-path: frontend-react/package-lock.json
     - run: npm ci
+      working-directory: frontend-react
     - run: npm run lint
+      working-directory: frontend-react
     - run: npm run build
+      working-directory: frontend-react
