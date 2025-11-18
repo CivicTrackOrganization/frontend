@@ -15,12 +15,14 @@ const AuthToggleTabs: React.FC<AuthToggleTabsProps> = ({
   return (
     <div className="flex justify-center bg-gray-200 rounded-xl p-1 w-full">
       <button
+        type="button"
         className={clsx(baseClasses, isRegister ? "bg-gray-200" : "bg-white")}
         onClick={() => setIsRegister(false)}
       >
         Login
       </button>
       <button
+        type="button"
         className={clsx(baseClasses, isRegister ? "bg-white" : "bg-gray-200")}
         onClick={() => setIsRegister(true)}
       >

@@ -26,7 +26,7 @@ const InputField: React.FC<InputFieldProps> = ({
         type={type}
         placeholder={placeholder}
         required={required}
-      ></input>
+      />
     </div>
   );
 };
