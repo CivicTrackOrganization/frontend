@@ -257,7 +257,7 @@ function NewReport({ onAddReport }: NewReportProps) {
 }
 
 
-function Mainpage() {
+function MainPage() {
   const [user, setUser] = useState<User>({
     username: "Paweł Kowalski",
     reputation: 15000,
@@ -340,4 +340,4 @@ function Mainpage() {
   );
 }
 
-export default Mainpage;
+export default MainPage;
