@@ -1,12 +1,14 @@
 import { useState } from "react";
 import AuthToggleTabs from "./components/AuthToggleTabs";
 import InputField from "./components/InputField";
+import { useNavigate } from "react-router-dom";
 
 function RegisterLoginPage() {
   const [isRegister, setIsRegister] = useState(false);
+  const navigate = useNavigate();
   const handleSubmit = (event: React.FormEvent): void => {
     event.preventDefault();
-    console.log(isRegister ? "User registration" : "User login");
+    navigate("/", { replace: true });
   };
 
   return (
