@@ -18,7 +18,6 @@ interface FormData {
 
 function RegisterLoginPage() {
   const [isRegister, setIsRegister] = useState(false);
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
