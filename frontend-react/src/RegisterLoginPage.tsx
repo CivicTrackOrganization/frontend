@@ -1,12 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import AuthToggleTabs from "./components/AuthToggleTabs";
 import InputField from "./components/InputField";
-import { useMutation } from "@tanstack/react-query";
 import {
   signUp,
-  type SignUpResponse,
   type SignUpRequest,
+  type SignUpResponse,
 } from "./services/userService";
 
 interface FormData {
