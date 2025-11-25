@@ -1,18 +1,31 @@
 import { useMutation } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { useState } from "react";
 import AuthToggleTabs from "./components/AuthToggleTabs";
 import InputField from "./components/InputField";
 import {
+  signIn,
   signUp,
+  type SignInRequest,
+  type SignInResponse,
   type SignUpRequest,
   type SignUpResponse,
 } from "./services/userService";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+}
+
+interface SignInError {
+  error: string;
+}
+
+interface SignUpError {
+  [key: string]: string[];
 }
 
 function RegisterLoginPage() {
@@ -25,15 +38,53 @@ function RegisterLoginPage() {
     password: "",
   });
 
-  const signUpMutation = useMutation<SignUpResponse, Error, SignUpRequest>({
+  const navigate = useNavigate();
+
+  const signUpMutation = useMutation<
+    SignUpResponse,
+    AxiosError<SignUpError>,
+    SignUpRequest
+  >({
     mutationFn: signUp,
     onSuccess: (data) => {
       alert(`Sign up successful for user ${data.username}. Please sign in.`);
       setIsRegister(false);
     },
-    onError: (error) => {
-      console.error("Sing-up failed:", error);
-      alert(`Sign up failed: ${error.message}. Check console for details.`);
+    onError: (error: AxiosError<SignUpError>) => {
+      const errors = error.response?.data;
+
+      if (errors) {
+        let errorMessage = "";
+
+        Object.entries(errors).forEach(([field, message]) => {
+          errorMessage += `\n${field}: ${message[0]}`;
+        });
+
+        console.error("Sing-up failed:", error);
+        alert(`Sign up failed: ${errorMessage}`);
+      } else {
+        alert(`Sign up failed: ${error.message}`);
+      }
+    },
+  });
+
+  const signInMutation = useMutation<
+    SignInResponse,
+    AxiosError<SignInError>,
+    SignInRequest
+  >({
+    mutationFn: signIn,
+    onSuccess: (data) => {
+      alert(`Sign in successful.`);
+      navigate("/", { replace: true });
+      localStorage.setItem("accessToken", data.access);
+      localStorage.setItem("refreshToken", data.refresh);
+    },
+    onError: (error: AxiosError<SignInError>) => {
+      const errorMessage =
+        error.response?.data.error || "An unknown error occured";
+      console.error("Sign-in failed: ", error);
+      alert(`Sign in failed: ${errorMessage}.`);
     },
   });
 
@@ -41,7 +92,7 @@ function RegisterLoginPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (event: React.FormEvent): void => {
+  const handleSignUp = (event: React.FormEvent): void => {
     event.preventDefault();
     if (signUpMutation.isPending) return;
 
@@ -54,6 +105,19 @@ function RegisterLoginPage() {
     signUpMutation.mutate(signUpRequest);
   };
 
+  const handleSignIn = (event: React.FormEvent): void => {
+    event.preventDefault();
+    if (signInMutation.isPending) return;
+
+    const signInRequest: SignInRequest = {
+      username: formData.firstName + formData.lastName,
+      email: formData.email,
+      password: formData.password,
+    };
+
+    signInMutation.mutate(signInRequest);
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-100">
       <div className="bg-white px-5 py-7 rounded-xl max-w-sm w-full m-3">
@@ -64,29 +128,25 @@ function RegisterLoginPage() {
           </p>
         </div>
         <AuthToggleTabs isRegister={isRegister} setIsRegister={setIsRegister} />
-        <form onSubmit={handleSubmit}>
-          {isRegister && (
-            <>
-              <InputField
-                id="first-name"
-                name="firstName"
-                label="First name"
-                type="text"
-                placeholder="John"
-                onChange={handleFormChange}
-                required
-              />
-              <InputField
-                id="last-name"
-                name="lastName"
-                label="Last name"
-                type="text"
-                placeholder="Doe"
-                onChange={handleFormChange}
-                required
-              />
-            </>
-          )}
+        <form onSubmit={isRegister ? handleSignUp : handleSignIn}>
+          <InputField
+            id="first-name"
+            name="firstName"
+            label="First name"
+            type="text"
+            placeholder="John"
+            onChange={handleFormChange}
+            required
+          />
+          <InputField
+            id="last-name"
+            name="lastName"
+            label="Last name"
+            type="text"
+            placeholder="Doe"
+            onChange={handleFormChange}
+            required
+          />
           <InputField
             id="email"
             name="email"

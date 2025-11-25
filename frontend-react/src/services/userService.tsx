@@ -11,6 +11,17 @@ export interface SignUpResponse {
   email: string;
 }
 
+export interface SignInRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface SignInResponse {
+  access: string;
+  refresh: string;
+}
+
 const API_URL = "http://localhost:8000";
 
 export const signUp = async (data: SignUpRequest): Promise<SignUpResponse> => {
@@ -21,6 +32,17 @@ export const signUp = async (data: SignUpRequest): Promise<SignUpResponse> => {
       headers: {
         "Content-Type": "application/json",
       },
+    }
+  );
+  return response.data;
+};
+
+export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
+  const response = await axios.post<SignInResponse>(
+    `${API_URL}/auth/sign-in/`,
+    data,
+    {
+      headers: { "Content-Type": "application/json" },
     }
   );
   return response.data;
