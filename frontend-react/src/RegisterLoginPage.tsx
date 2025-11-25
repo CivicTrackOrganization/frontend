@@ -76,9 +76,9 @@ function RegisterLoginPage() {
     mutationFn: signIn,
     onSuccess: (data) => {
       alert(`Sign in successful.`);
-      navigate("/", { replace: true });
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
+      navigate("/", { replace: true });
     },
     onError: (error: AxiosError<SignInError>) => {
       const errorMessage =
