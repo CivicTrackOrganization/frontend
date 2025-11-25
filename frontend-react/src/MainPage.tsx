@@ -5,7 +5,7 @@ import MapSection from "./components/MapSection";
 import ReportsList from "./components/ReportList";
 import ModeratorPanel from "./components/ModeratorPanel";
 import NewReport from "./components/NewReport";
-import type { User, Report, GlobalStats } from "./types";
+import type { User, Report, GlobalStats} from "./types";
 
 
 
@@ -14,7 +14,7 @@ function MainPage() {
     username: "Paweł Kowalski",
     reputation: 15000,
     reports: 3,
-    isModerator: false,
+    role: "user",
   });
 
   const [reports, setReports] = useState<Report[]>([
@@ -24,8 +24,11 @@ function MainPage() {
         "Large pothole in the asphalt, a hazard for drivers. Approximately 50 cm in diameter.",
       location: "Główna St 15, Warsaw",
       priority: "High",
-      status: "Verified",
+      status: "Resolved",
       author: user.username,
+      reportType: "infrastructure",
+      assignedUnit: "maintenance",
+      createdAt: new Date(),
     },
     {
       title: "Broken streetlight on Słoneczna",
@@ -34,6 +37,9 @@ function MainPage() {
       priority: "Normal",
       status: "New",
       author: "Inna Osoba",
+      reportType: "infrastructure",
+      assignedUnit: "general",
+      createdAt: new Date(),
     },
   ]);
 
@@ -48,26 +54,24 @@ function MainPage() {
   const handleAddReport = (report: Report) => {
     const reportWithAuthor: Report = { ...report, author: report.author ?? user.username };
     setReports((prev) => [reportWithAuthor, ...prev]);
-    // user.reports is derived from `reports`; no need to update it directly
     setShowNewReport(false);
   };
 
   const handleApprove = (index: number) => {
-    setReports((prev) => prev.map((r, i) => (i === index ? { ...r, status: 'Verified' } : r)));
+    setReports((prev) => prev.map((r, i) => (i === index ? { ...r, status: 'Resolved' } : r)));
   };
 
   const handleReject = (index: number) => {
     setReports((prev) => prev.map((r, i) => (i === index ? { ...r, status: 'Rejected' } : r)));
   };
 
-  const toggleModerator = () => setUser((u) => ({ ...u, isModerator: !u.isModerator }));
+  const toggleModerator = () => setUser((u) => ({ ...u, role: u.role === 'moderator' ? 'user' : 'moderator' }));
 
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
-      <Header username={user.username} reputation={user.reputation} isModerator={user.isModerator} onToggleModerator={toggleModerator} />
+      <Header username={user.username} reputation={user.reputation} role={user.role} onToggleModerator={toggleModerator} />
       <main className="p-6 mx-auto space-y-6 max-w-7xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {/* compute stats from current reports */}
           {(() => {
             const yourReports = reports.filter((r) => r.author === user.username).length;
             const activeGlobal = globalStats.totalReports - globalStats.resolvedReports;
@@ -101,7 +105,7 @@ function MainPage() {
               >
                 ×
               </button>
-              <NewReport onAddReport={handleAddReport} />
+              <NewReport onAddReport={handleAddReport} user={user} />
             </div>
           </div>
         </div>
@@ -131,7 +135,7 @@ function MainPage() {
           </div>
 
           <div>
-            {user.isModerator ? (
+            {user.role == 'moderator' ? (
               <ModeratorPanel reports={reports} onApprove={handleApprove} onReject={handleReject} />
               ) : (
               <ReportsList

@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import type { UserRole } from "../types";
 
 interface HeaderProps {
   username: string;
   reputation: number;
-  isModerator: boolean;
+  role: UserRole;
   onToggleModerator: () => void;
 }
 
@@ -20,16 +21,16 @@ function Header(props: HeaderProps) {
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right">
-          <p className="font-medium">{props.username} {props.isModerator && <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded">Moderator</span>}</p>
+          <p className="font-medium">{props.username} {props.role === 'moderator' && <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded">Moderator</span>}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={props.onToggleModerator}
             className="px-3 py-1 text-sm bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
           >
-            {props.isModerator ? 'Switch to user' : 'Switch to moderator'}
+            {props.role === 'moderator' ? 'Switch to user' : 'Switch to moderator'}
           </button>
-          <button onClick={() => navigate('/register-login')} className="px-4 py-2 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-50">Log out</button>
+          <button onClick={() => navigate('/register-login', {replace: true})} className="px-4 py-2 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-50">Log out</button>
         </div>
       </div>
     </header>
