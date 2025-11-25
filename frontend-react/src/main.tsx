@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./index.css";
-import MainPage from "./MainPage.tsx";
+import MainPage from "./mainpage.tsx";
 import RegisterLoginPage from "./RegisterLoginPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
