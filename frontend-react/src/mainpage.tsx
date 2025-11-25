@@ -126,8 +126,8 @@ function ReportItem({ report }: ReportItemProps) {
           <p className="font-semibold">{report.title}</p>
           <p className="text-sm text-gray-600">{report.description}</p>
             <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-              <span>📍 {report.location}</span>
-              <span>🗓 Nov 1, 2024 01:00</span>
+              <span>{report.location}</span>
+              <span>Nov 1, 2024 01:00</span>
             </div>
         </div>
         <div className="flex flex-col items-end gap-2">
