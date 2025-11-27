@@ -38,6 +38,9 @@ function RegisterLoginPage() {
     password: "",
   });
 
+  const [emailError, setEmailError] = useState<string>();
+  const [passwordError, setPasswordError] = useState<string>();
+
   const navigate = useNavigate();
 
   const signUpMutation = useMutation<
@@ -98,6 +101,8 @@ function RegisterLoginPage() {
 
     const signUpRequest: SignUpRequest = {
       username: formData.firstName + formData.lastName,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
       password: formData.password,
     };
@@ -110,7 +115,6 @@ function RegisterLoginPage() {
     if (signInMutation.isPending) return;
 
     const signInRequest: SignInRequest = {
-      username: formData.firstName + formData.lastName,
       email: formData.email,
       password: formData.password,
     };
@@ -129,24 +133,28 @@ function RegisterLoginPage() {
         </div>
         <AuthToggleTabs isRegister={isRegister} setIsRegister={setIsRegister} />
         <form onSubmit={isRegister ? handleSignUp : handleSignIn}>
-          <InputField
-            id="first-name"
-            name="firstName"
-            label="First name"
-            type="text"
-            placeholder="John"
-            onChange={handleFormChange}
-            required
-          />
-          <InputField
-            id="last-name"
-            name="lastName"
-            label="Last name"
-            type="text"
-            placeholder="Doe"
-            onChange={handleFormChange}
-            required
-          />
+          {isRegister && (
+            <>
+              <InputField
+                id="first-name"
+                name="firstName"
+                label="First name"
+                type="text"
+                placeholder="John"
+                onChange={handleFormChange}
+                required
+              />
+              <InputField
+                id="last-name"
+                name="lastName"
+                label="Last name"
+                type="text"
+                placeholder="Doe"
+                onChange={handleFormChange}
+                required
+              />
+            </>
+          )}
           <InputField
             id="email"
             name="email"
@@ -156,15 +164,16 @@ function RegisterLoginPage() {
             onChange={handleFormChange}
             required
           />
+          {emailError && <p>${emailError}</p>}
           <InputField
             id="password"
             name="password"
             label="Password"
             type="password"
-            placeholder="***********"
             onChange={handleFormChange}
             required
           />
+          {passwordError && <p>${passwordError}</p>}
           <button className="w-full py-2 bg-black text-white rounded-xl mt-4 font-semibold hover:bg-gray-800 transition-colors cursor-pointer">
             {isRegister ? "Register" : "Login"}
           </button>
