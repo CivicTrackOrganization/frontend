@@ -90,9 +90,9 @@ function RegisterLoginPage() {
         displayValidationErrors(error.response?.data as ValidationError);
       } else {
         console.error(
-          `Error occured, message: ${error.message}, status: ${error.status}`
+          `Error occurred, message: ${error.message}, status: ${error.status}`
         );
-        toast.error("A connection error occured. Please try again.");
+        toast.error("A connection error occurred. Please try again.");
       }
     },
   });
