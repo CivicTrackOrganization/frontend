@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import AuthToggleTabs from "./components/AuthToggleTabs";
 import InputField from "./components/InputField";
 import {
@@ -12,84 +13,132 @@ import {
   type SignUpResponse,
 } from "./services/userService";
 import { useNavigate } from "react-router-dom";
+import {
+  isGeneralError,
+  type SignError,
+  type ValidationError,
+} from "./utils/error-handling";
 
-interface FormData {
-  firstName: string;
-  lastName: string;
+interface BaseForm {
   email: string;
   password: string;
 }
 
-interface SignInError {
-  error: string;
-}
-
-interface SignUpError {
-  [key: string]: string[];
+interface RegisterForm extends BaseForm {
+  firstName: string;
+  lastName: string;
 }
 
 function RegisterLoginPage() {
   const [isRegister, setIsRegister] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
+  const [baseFormData, setBaseFormData] = useState<BaseForm>({
     email: "",
     password: "",
   });
 
+  const [registerFormData, setRegisterFormData] = useState<
+    Omit<RegisterForm, keyof BaseForm>
+  >({
+    firstName: "",
+    lastName: "",
+  });
+
+  const [emailError, setEmailError] = useState<string>();
+  const [passwordError, setPasswordError] = useState<string>();
+
   const navigate = useNavigate();
+
+  const clearErrors = () => {
+    setEmailError("");
+    setPasswordError("");
+  };
+
+  const displayValidationErrors = (errors: ValidationError) => {
+    Object.entries(errors).forEach(([field, message]) => {
+      switch (field) {
+        case "email":
+          setEmailError(message[0]);
+          break;
+        case "password":
+          setPasswordError(message[0]);
+      }
+    });
+  };
 
   const signUpMutation = useMutation<
     SignUpResponse,
-    AxiosError<SignUpError>,
+    AxiosError<SignError>,
     SignUpRequest
   >({
     mutationFn: signUp,
     onSuccess: (data) => {
-      alert(`Sign up successful for user ${data.username}. Please sign in.`);
+      toast.success(
+        `Sign up successful for user ${
+          data.firstName + " " + data.lastName
+        }. Please sign in.`
+      );
       setIsRegister(false);
     },
-    onError: (error: AxiosError<SignUpError>) => {
-      const errors = error.response?.data;
-
-      if (errors) {
-        let errorMessage = "";
-
-        Object.entries(errors).forEach(([field, message]) => {
-          errorMessage += `\n${field}: ${message[0]}`;
-        });
-
-        console.error("Sing-up failed:", error);
-        alert(`Sign up failed: ${errorMessage}`);
+    onError: (error: AxiosError<SignError>) => {
+      if (isGeneralError(error)) {
+        const errorMessage = error.response?.data?.error;
+        if (errorMessage) {
+          toast.error(errorMessage);
+        }
+      } else if (error.response?.data) {
+        displayValidationErrors(error.response?.data as ValidationError);
       } else {
-        alert(`Sign up failed: ${error.message}`);
+        console.error(
+          `Error occurred, message: ${error.message}, status: ${error.status}`
+        );
+        toast.error("A connection error occurred. Please try again.");
       }
     },
   });
 
   const signInMutation = useMutation<
     SignInResponse,
-    AxiosError<SignInError>,
+    AxiosError<SignError>,
     SignInRequest
   >({
     mutationFn: signIn,
     onSuccess: (data) => {
-      alert(`Sign in successful.`);
+      toast.success("Sign in successful");
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
       navigate("/", { replace: true });
     },
-    onError: (error: AxiosError<SignInError>) => {
-      const errorMessage =
-        error.response?.data.error || "An unknown error occured";
-      console.error("Sign-in failed: ", error);
-      alert(`Sign in failed: ${errorMessage}.`);
+    onError: (error: AxiosError<SignError>) => {
+      if (isGeneralError(error)) {
+        const errorMessage = error.response?.data?.error;
+        if (errorMessage) {
+          toast.error(errorMessage);
+        }
+      } else if (error.response?.data) {
+        displayValidationErrors(error.response.data as ValidationError);
+      } else {
+        console.error(
+          `Error occurred, message: ${error.message}, status: ${error.status}`
+        );
+        toast.error("A connection error occurred. Please try again.");
+      }
     },
   });
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    clearErrors();
+    if (e.target.name in registerFormData) {
+      setRegisterFormData({
+        ...registerFormData,
+        [e.target.name]: e.target.value,
+      });
+    } else {
+      setBaseFormData({
+        ...baseFormData,
+        [e.target.name]: e.target.value,
+      });
+    }
   };
 
   const handleSignUp = (event: React.FormEvent): void => {
@@ -97,9 +146,11 @@ function RegisterLoginPage() {
     if (signUpMutation.isPending) return;
 
     const signUpRequest: SignUpRequest = {
-      username: formData.firstName + formData.lastName,
-      email: formData.email,
-      password: formData.password,
+      username: registerFormData.firstName + registerFormData.lastName,
+      firstName: registerFormData.firstName,
+      lastName: registerFormData.lastName,
+      email: baseFormData.email,
+      password: baseFormData.password,
     };
 
     signUpMutation.mutate(signUpRequest);
@@ -110,9 +161,8 @@ function RegisterLoginPage() {
     if (signInMutation.isPending) return;
 
     const signInRequest: SignInRequest = {
-      username: formData.firstName + formData.lastName,
-      email: formData.email,
-      password: formData.password,
+      email: baseFormData.email,
+      password: baseFormData.password,
     };
 
     signInMutation.mutate(signInRequest);
@@ -129,24 +179,28 @@ function RegisterLoginPage() {
         </div>
         <AuthToggleTabs isRegister={isRegister} setIsRegister={setIsRegister} />
         <form onSubmit={isRegister ? handleSignUp : handleSignIn}>
-          <InputField
-            id="first-name"
-            name="firstName"
-            label="First name"
-            type="text"
-            placeholder="John"
-            onChange={handleFormChange}
-            required
-          />
-          <InputField
-            id="last-name"
-            name="lastName"
-            label="Last name"
-            type="text"
-            placeholder="Doe"
-            onChange={handleFormChange}
-            required
-          />
+          {isRegister && (
+            <>
+              <InputField
+                id="first-name"
+                name="firstName"
+                label="First name"
+                type="text"
+                placeholder="John"
+                onChange={handleFormChange}
+                required
+              />
+              <InputField
+                id="last-name"
+                name="lastName"
+                label="Last name"
+                type="text"
+                placeholder="Doe"
+                onChange={handleFormChange}
+                required
+              />
+            </>
+          )}
           <InputField
             id="email"
             name="email"
@@ -156,16 +210,25 @@ function RegisterLoginPage() {
             onChange={handleFormChange}
             required
           />
+          {emailError && (
+            <p className="ml-1 text-sm text-red-600">{emailError}</p>
+          )}
           <InputField
             id="password"
             name="password"
             label="Password"
             type="password"
-            placeholder="***********"
             onChange={handleFormChange}
             required
           />
-          <button className="w-full py-2 bg-black text-white rounded-xl mt-4 font-semibold hover:bg-gray-800 transition-colors cursor-pointer">
+          {passwordError && (
+            <p className="ml-1 text-sm text-red-600">{passwordError}</p>
+          )}
+          <button
+            type="submit"
+            className="w-full py-2 bg-black text-white rounded-xl mt-4 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+            disabled={signUpMutation.isPending || signInMutation.isPending}
+          >
             {isRegister ? "Register" : "Login"}
           </button>
         </form>

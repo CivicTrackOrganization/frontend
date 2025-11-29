@@ -2,6 +2,8 @@ import axios from "axios";
 
 export interface SignUpRequest {
   username: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
@@ -9,10 +11,11 @@ export interface SignUpRequest {
 export interface SignUpResponse {
   username: string;
   email: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface SignInRequest {
-  username: string;
   email: string;
   password: string;
 }
