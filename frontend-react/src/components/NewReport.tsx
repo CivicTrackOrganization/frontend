@@ -1,6 +1,6 @@
-import { CreateReportRequest } from "../types";
+import { createReportRequestFromPartial } from "../types";
 import type { Report, User, PriorityType, ReportType, AssignedUnit } from "../types";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface NewReportProps {
   onAddReport: (report: Report) => void;
@@ -33,20 +33,23 @@ function NewReport({ onAddReport, user }: NewReportProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const req = new CreateReportRequest(user);
-    req.report.title = form.title;
-    req.report.description = form.description;
-    req.report.location = form.location;
-    req.report.priority = form.priority;
-    req.report.reportType = form.reportType;
-    req.report.assignedUnit = form.assignedUnit;
-    onAddReport(req.report);
+
+    const req = createReportRequestFromPartial(user, form as Partial<Report>);
+    onAddReport(req);
 
     setForm(initialForm);
     setImage(null);
     setPreview(null);
     if (fileRef.current) fileRef.current.value = "";
   };
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   return (
     <div className="p-5 bg-white border border-gray-100 rounded-lg shadow-md">
@@ -148,9 +151,11 @@ function NewReport({ onAddReport, user }: NewReportProps) {
               onChange={(e) => {
                 const f = e.target.files && e.target.files[0];
                 if (f) {
+                  if (preview) URL.revokeObjectURL(preview);
                   setImage(f);
                   setPreview(URL.createObjectURL(f));
                 } else {
+                  if (preview) URL.revokeObjectURL(preview);
                   setImage(null);
                   setPreview(null);
                 }
@@ -166,8 +171,8 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         <div className="flex justify-end mt-2 sm:col-span-2">
           <button
             type="submit"
-            className={`px-4 py-2 text-white rounded ${form.title ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'}`}
-            disabled={!form.title}
+            className={`px-4 py-2 text-white rounded ${form.title && form.description && form.location ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'}`}
+            disabled={!form.title || !form.description || !form.location}
           >
             Add report
           </button>

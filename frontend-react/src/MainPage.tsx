@@ -137,7 +137,7 @@ function MainPage() {
           </div>
 
           <div>
-            {user.role == 'moderator' ? (
+            {user.role === 'moderator' ? (
               <ModeratorPanel reports={reports} onApprove={handleApprove} onReject={handleReject} />
               ) : (
               <ReportsList

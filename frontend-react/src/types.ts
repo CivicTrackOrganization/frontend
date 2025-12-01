@@ -32,19 +32,23 @@ export interface GlobalStats {
   resolvedReports: number;
 }
 
-export class CreateReportRequest {
-  report: Report;
+export interface CreateReportRequest extends Report {}
 
-  constructor(user: User) {
-    this.report = {} as Report;
-    this.report.title = "";
-    this.report.description = "";
-    this.report.location = "";
-    this.report.priority = "Normal";
-    this.report.status = "New";
-    this.report.author = user.username;
-    this.report.reportType = "other";
-    this.report.assignedUnit = "general";
-    this.report.createdAt = new Date();
-  }
+export function createReportRequest(user: User): CreateReportRequest {
+  return {
+    title: "",
+    description: "",
+    location: "",
+    priority: "Normal",
+    status: "New",
+    author: user.username,
+    reportType: "other",
+    assignedUnit: "general",
+    createdAt: new Date(),
+  } as CreateReportRequest;
+}
+
+export function createReportRequestFromPartial(user: User, partial: Partial<Report>): CreateReportRequest {
+  const base = createReportRequest(user);
+  return { ...base, ...partial, createdAt: new Date() } as CreateReportRequest;
 }
