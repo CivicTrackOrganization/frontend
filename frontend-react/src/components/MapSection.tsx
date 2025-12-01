@@ -1,26 +1,35 @@
-interface MapSectionProps {
-  className?: string;
-}
+import React, { useRef, useEffect } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-function MapSection({ className }: MapSectionProps) {
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+const MapSection: React.FC = () => {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const coords : [number, number] = [19.906864041831486,50.03011538986579]
+
+  useEffect(() => {
+    if (mapRef.current) return;
+
+    if (mapContainerRef.current) {
+      mapRef.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: coords,
+        zoom: 10
+      });
+
+      new mapboxgl.Marker().setLngLat(coords).addTo(mapRef.current);
+    }
+  }, []);
+
   return (
-    <div className={`bg-white rounded-xl shadow flex flex-col overflow-hidden ${className}`}>
-      <div className="px-4 py-3 text-white bg-linear-to-r from-blue-600 to-indigo-600">
-        <h2 className="font-semibold">Report Map</h2>
-        <p className="text-xs opacity-90">See all reports on the city map</p>
-      </div>
-      <div className="flex-1 p-4">
-        <div className="w-full h-full overflow-hidden border rounded">
-          <iframe
-            title="City map"
-            className="w-full h-full border-none"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=20.95%2C52.20%2C21.08%2C52.25&layer=mapnik&marker=52.2297%2C21.0122"
-            loading="lazy"
-          />
-        </div>
-      </div>
-    </div>
+    <div
+      ref={mapContainerRef}
+      style={{ width: "100%", height: "400px" }}
+    />
   );
-}
+};
 
 export default MapSection;
