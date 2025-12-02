@@ -37,27 +37,29 @@ export interface GlobalStats {
   resolvedReports: number;
 }
 
-export interface CreateReportRequest extends Report {}
-
-export function createReportRequest(user: User): CreateReportRequest {
-  return {
-    reportID: crypto.randomUUID(),
-    title: "",
-    description: "",
-    location: "",
-    priority: "Normal",
-    status: "New",
-    author: user.username,
-    reportType: "other",
-    assignedUnit: "general",
-    createdAt: new Date(),
-  } as CreateReportRequest;
+export interface CreateReportRequest {
+  title: string;
+  description: string;
+  location: string;
+  priority: PriorityType;
+  reportType: ReportType;
+  assignedUnit: AssignedUnit; // TODO remove in the future, it should be assigned by moderator instead
 }
 
-export function createReportRequestFromPartial(
-  user: User,
-  partial: Partial<Report>
-): CreateReportRequest {
-  const base = createReportRequest(user);
-  return { ...base, ...partial, createdAt: new Date() };
+export function createReportRequest(
+  createReportRequest: CreateReportRequest
+): Report {
+  const response: Report = {
+    reportID: crypto.randomUUID(),
+    title: createReportRequest.title,
+    description: createReportRequest.description,
+    location: createReportRequest.location,
+    priority: createReportRequest.priority,
+    status: "New",
+    author: "Paweł Kowalski",
+    reportType: createReportRequest.reportType,
+    assignedUnit: createReportRequest.assignedUnit,
+    createdAt: new Date(),
+  };
+  return response;
 }

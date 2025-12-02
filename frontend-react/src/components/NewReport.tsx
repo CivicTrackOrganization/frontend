@@ -1,5 +1,12 @@
-import { createReportRequestFromPartial } from "../types";
-import type { Report, User, PriorityType, ReportType, AssignedUnit } from "../types";
+import { createReportRequest } from "../types";
+import type {
+  Report,
+  User,
+  PriorityType,
+  ReportType,
+  AssignedUnit,
+  CreateReportRequest,
+} from "../types";
 import { useState, useRef, useEffect } from "react";
 
 interface NewReportProps {
@@ -7,7 +14,7 @@ interface NewReportProps {
   user: User;
 }
 
-function NewReport({ onAddReport, user }: NewReportProps) {
+function NewReport({ onAddReport }: NewReportProps) {
   type FormState = {
     title: string;
     description: string;
@@ -27,18 +34,22 @@ function NewReport({ onAddReport, user }: NewReportProps) {
   };
 
   const [form, setForm] = useState<FormState>(initialForm);
-  const [image, setImage] = useState<File | null>(null);
+  // const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const req = createReportRequestFromPartial(user, form as Partial<Report>);
-    onAddReport(req);
+    const requestData: CreateReportRequest = {
+      ...form,
+    };
+
+    const response: Report = createReportRequest(requestData);
+    onAddReport(response);
 
     setForm(initialForm);
-    setImage(null);
+    // setImage(null);
     setPreview(null);
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -56,19 +67,28 @@ function NewReport({ onAddReport, user }: NewReportProps) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold">Add report</h2>
-          <p className="text-sm text-gray-500">Describe the issue and choose a category</p>
+          <p className="text-sm text-gray-500">
+            Describe the issue and choose a category
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+      >
         <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">Title</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Title
+          </label>
           <div className="flex items-center gap-2">
             <input
               type="text"
               placeholder="Short report title"
               value={form.title}
-              onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, title: e.target.value }))
+              }
               className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
               required
             />
@@ -76,35 +96,52 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">Description</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Description
+          </label>
           <textarea
             placeholder="Details (what happened, when, additional info)"
             value={form.description}
-            onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, description: e.target.value }))
+            }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200 h-28"
             maxLength={1000}
             required
           />
-          <div className="text-xs text-right text-gray-500">{form.description.length}/1000</div>
+          <div className="text-xs text-right text-gray-500">
+            {form.description.length}/1000
+          </div>
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Location</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Location
+          </label>
           <input
             type="text"
             placeholder="Address or description of location"
             value={form.location}
-            onChange={(e) => setForm((s) => ({ ...s, location: e.target.value }))}
+            onChange={(e) =>
+              setForm((s) => ({ ...s, location: e.target.value }))
+            }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
             required
           />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Priority</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Priority
+          </label>
           <select
             value={form.priority}
-            onChange={(e) => setForm((s) => ({ ...s, priority: e.target.value as PriorityType }))}
+            onChange={(e) =>
+              setForm((s) => ({
+                ...s,
+                priority: e.target.value as PriorityType,
+              }))
+            }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
           >
             <option value="Low">Low</option>
@@ -114,10 +151,17 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Category</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Category
+          </label>
           <select
             value={form.reportType}
-            onChange={(e) => setForm((s) => ({ ...s, reportType: e.target.value as ReportType }))}
+            onChange={(e) =>
+              setForm((s) => ({
+                ...s,
+                reportType: e.target.value as ReportType,
+              }))
+            }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
           >
             <option value="infrastructure">Infrastructure</option>
@@ -128,10 +172,17 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Assigned Unit</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Assigned Unit
+          </label>
           <select
             value={form.assignedUnit}
-            onChange={(e) => setForm((s) => ({ ...s, assignedUnit: e.target.value as AssignedUnit }))}
+            onChange={(e) =>
+              setForm((s) => ({
+                ...s,
+                assignedUnit: e.target.value as AssignedUnit,
+              }))
+            }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
           >
             <option value="maintenance">Maintenance</option>
@@ -142,7 +193,9 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">Attach photo (optional)</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Attach photo (optional)
+          </label>
           <div className="flex items-center gap-3">
             <input
               ref={fileRef}
@@ -152,18 +205,22 @@ function NewReport({ onAddReport, user }: NewReportProps) {
                 const f = e.target.files && e.target.files[0];
                 if (f) {
                   if (preview) URL.revokeObjectURL(preview);
-                  setImage(f);
+                  // setImage(f);
                   setPreview(URL.createObjectURL(f));
                 } else {
                   if (preview) URL.revokeObjectURL(preview);
-                  setImage(null);
+                  // setImage(null);
                   setPreview(null);
                 }
               }}
               className="p-1"
             />
             {preview && (
-              <img src={preview} alt="preview" className="object-cover w-20 h-20 border rounded" />
+              <img
+                src={preview}
+                alt="preview"
+                className="object-cover w-20 h-20 border rounded"
+              />
             )}
           </div>
         </div>
@@ -171,7 +228,11 @@ function NewReport({ onAddReport, user }: NewReportProps) {
         <div className="flex justify-end mt-2 sm:col-span-2">
           <button
             type="submit"
-            className={`px-4 py-2 text-white rounded ${form.title && form.description && form.location ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'}`}
+            className={`px-4 py-2 text-white rounded ${
+              form.title && form.description && form.location
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
             disabled={!form.title || !form.description || !form.location}
           >
             Add report
