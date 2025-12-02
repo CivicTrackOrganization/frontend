@@ -1,12 +1,17 @@
-export type StatusType = 'New' | 'In Progress' | 'Resolved' | 'Rejected';
+export type StatusType = "New" | "In Progress" | "Resolved" | "Rejected";
 
-export type PriorityType = 'Low' | 'Normal' | 'High';
+export type PriorityType = "Low" | "Normal" | "High";
 
-export type ReportType = 'infrastructure' | 'safety' | 'environment' | 'other';
+export type ReportType = "infrastructure" | "safety" | "environment" | "other";
 
-export type AssignedUnit = 'maintenance' | 'police' | 'environmental' | 'general';
+export type AssignedUnit =
+  | "maintenance"
+  | "police"
+  | "environmental"
+  | "general";
 
 export interface Report {
+  reportID: string;
   title: string;
   description: string;
   location: string;
@@ -16,10 +21,9 @@ export interface Report {
   reportType: ReportType;
   assignedUnit: AssignedUnit;
   createdAt: Date;
-  reportID: string;
 }
 
-export type UserRole = 'user' | 'moderator' | 'admin';
+export type UserRole = "user" | "moderator" | "admin";
 
 export interface User {
   username: string;
@@ -37,6 +41,7 @@ export interface CreateReportRequest extends Report {}
 
 export function createReportRequest(user: User): CreateReportRequest {
   return {
+    reportID: crypto.randomUUID(),
     title: "",
     description: "",
     location: "",
@@ -49,7 +54,10 @@ export function createReportRequest(user: User): CreateReportRequest {
   } as CreateReportRequest;
 }
 
-export function createReportRequestFromPartial(user: User, partial: Partial<Report>): CreateReportRequest {
+export function createReportRequestFromPartial(
+  user: User,
+  partial: Partial<Report>
+): CreateReportRequest {
   const base = createReportRequest(user);
-  return { ...base, ...partial, createdAt: new Date() } as CreateReportRequest;
+  return { ...base, ...partial, createdAt: new Date() };
 }
