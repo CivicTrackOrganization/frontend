@@ -11,7 +11,6 @@ import { useState, useRef, useEffect } from "react";
 
 interface NewReportProps {
   onAddReport: (report: Report) => void;
-  user: User;
 }
 
 function NewReport({ onAddReport }: NewReportProps) {
