@@ -16,6 +16,7 @@ export interface Report {
   reportType: ReportType;
   assignedUnit: AssignedUnit;
   createdAt: Date;
+  reportID: string;
 }
 
 export type UserRole = 'user' | 'moderator' | 'admin';

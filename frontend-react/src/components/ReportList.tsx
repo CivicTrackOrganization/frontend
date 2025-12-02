@@ -14,8 +14,8 @@ function ReportsList({ reports, title = "Reports in your area" }: ReportsListPro
         <p className="text-xs text-gray-500">Confirm and comment on reports from other users</p>
       </div>
       <div className="p-4 overflow-y-auto h-72">
-        {reports.map((report, index) => (
-          <ReportItem key={index} report={report} />
+        {reports.map((report) => (
+          <ReportItem key={report.reportID} report={report} />
         ))}
       </div>
     </div>

@@ -29,6 +29,7 @@ function MainPage() {
       reportType: "infrastructure",
       assignedUnit: "maintenance",
       createdAt: new Date(),
+      reportID: "rpt-001",
     },
     {
       title: "Broken streetlight on Słoneczna",
@@ -40,6 +41,7 @@ function MainPage() {
       reportType: "infrastructure",
       assignedUnit: "general",
       createdAt: new Date(),
+      reportID: "rpt-002",
     },
   ]);
 
