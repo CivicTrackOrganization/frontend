@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import type {
   AssignedUnit,
   CreateReportRequest,
   PriorityType,
   Report,
-  ReportType
+  ReportType,
 } from "../types";
-import { createReportRequest } from "../types";
+import { submitReport } from "../services/reportService";
 
 interface NewReportProps {
   onAddReport: (report: Report) => void;
@@ -38,19 +40,38 @@ function NewReport({ onAddReport }: NewReportProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitReportMutation.isPending) return;
 
     const requestData: CreateReportRequest = {
       ...form,
     };
 
-    const response: Report = createReportRequest(requestData);
-    onAddReport(response);
+    // `FileList.item` may return `File | null` and indexing can be `File | undefined`.
+    // Normalize to `File | undefined` so it matches the mutation's `file?: File` type.
+    const maybeFile = fileRef.current?.files?.item(0);
+    const file: File | undefined = maybeFile ?? undefined;
 
-    setForm(initialForm);
-    // setImage(null);
-    setPreview(null);
-    if (fileRef.current) fileRef.current.value = "";
+    submitReportMutation.mutate({ payload: requestData, file });
   };
+
+  const submitReportMutation = useMutation<
+    Report,
+    Error,
+    { payload: CreateReportRequest; file?: File }
+  >({
+    mutationFn: ({ payload, file }) => submitReport(payload, file),
+    onSuccess: (data) => {
+      toast.success("Report submitted");
+      onAddReport(data);
+      setForm(initialForm);
+      setPreview(null);
+      if (fileRef.current) fileRef.current.value = "";
+    },
+    onError: (error) => {
+      console.error("Failed to submit report", error);
+      toast.error("Failed to submit report. Please try again.");
+    },
+  });
 
   useEffect(() => {
     return () => {
@@ -227,11 +248,11 @@ function NewReport({ onAddReport }: NewReportProps) {
           <button
             type="submit"
             className={`px-4 py-2 text-white rounded ${
-              form.title && form.description && form.location
+              form.title && form.description && form.location && !submitReportMutation.isPending
                 ? "bg-blue-600 hover:bg-blue-700"
                 : "bg-gray-300 cursor-not-allowed"
             }`}
-            disabled={!form.title || !form.description || !form.location}
+            disabled={!form.title || !form.description || !form.location || submitReportMutation.isPending}
           >
             Add report
           </button>
