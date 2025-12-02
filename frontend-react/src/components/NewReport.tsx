@@ -1,13 +1,12 @@
-import { createReportRequest } from "../types";
+import { useEffect, useRef, useState } from "react";
 import type {
-  Report,
-  User,
-  PriorityType,
-  ReportType,
   AssignedUnit,
   CreateReportRequest,
+  PriorityType,
+  Report,
+  ReportType
 } from "../types";
-import { useState, useRef, useEffect } from "react";
+import { createReportRequest } from "../types";
 
 interface NewReportProps {
   onAddReport: (report: Report) => void;
