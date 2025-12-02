@@ -8,7 +8,6 @@ import NewReport from "./components/NewReport";
 import type { User, Report, GlobalStats} from "./types";
 
 
-
 function MainPage() {
   const [user, setUser] = useState<User>({
     username: "Paweł Kowalski",
