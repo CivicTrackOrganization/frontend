@@ -1,5 +1,4 @@
 import axios from "axios";
-import type { User } from "../types";
 
 export interface SignUpRequest {
   username: string;
