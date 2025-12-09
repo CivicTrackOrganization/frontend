@@ -1,34 +1,29 @@
 import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import type {
-  AssignedUnit,
   CreateReportRequest,
   PriorityType,
   Report,
-  ReportType
+  ReportType,
 } from "../types";
-import { createReportRequest } from "../types";
+import { submitReport } from "../services/reportService";
 
-interface NewReportProps {
-  onAddReport: (report: Report) => void;
-}
-
-function NewReport({ onAddReport }: NewReportProps) {
+function NewReport() {
   type FormState = {
     title: string;
     description: string;
     location: string;
     priority: PriorityType;
-    reportType: ReportType;
-    assignedUnit: AssignedUnit;
+    type: ReportType;
   };
 
   const initialForm: FormState = {
     title: "",
     description: "",
     location: "",
-    priority: "Normal",
-    reportType: "other",
-    assignedUnit: "general",
+    priority: "normal",
+    type: "other",
   };
 
   const [form, setForm] = useState<FormState>(initialForm);
@@ -36,21 +31,45 @@ function NewReport({ onAddReport }: NewReportProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  const queryClient = useQueryClient();
+  const MY_REPORTS_KEY = ["myReports"];
+  const ALL_REPORTS_KEY = ["reports"];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitReportMutation.isPending) return;
 
     const requestData: CreateReportRequest = {
       ...form,
     };
 
-    const response: Report = createReportRequest(requestData);
-    onAddReport(response);
+    // `FileList.item` may return `File | null` and indexing can be `File | undefined`.
+    // Normalize to `File | undefined` so it matches the mutation's `file?: File` type.
+    const maybeFile = fileRef.current?.files?.item(0);
+    const file: File | undefined = maybeFile ?? undefined;
 
-    setForm(initialForm);
-    // setImage(null);
-    setPreview(null);
-    if (fileRef.current) fileRef.current.value = "";
+    submitReportMutation.mutate({ payload: requestData, file });
   };
+
+  const submitReportMutation = useMutation<
+    Report,
+    Error,
+    { payload: CreateReportRequest; file?: File }
+  >({
+    mutationFn: ({ payload, file }) => submitReport(payload, file),
+    onSuccess: () => {
+      setForm(initialForm);
+      setPreview(null);
+      queryClient.invalidateQueries({ queryKey: MY_REPORTS_KEY });
+      queryClient.invalidateQueries({ queryKey: ALL_REPORTS_KEY });
+      toast.success("Report successfully submitted.");
+      if (fileRef.current) fileRef.current.value = "";
+    },
+    onError: (error) => {
+      console.error("Failed to submit report", error);
+      toast.error("Failed to submit report. Please try again.");
+    },
+  });
 
   useEffect(() => {
     return () => {
@@ -142,22 +161,22 @@ function NewReport({ onAddReport }: NewReportProps) {
             }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
           >
-            <option value="Low">Low</option>
-            <option value="Normal">Normal</option>
-            <option value="High">High</option>
+            <option value="low">Low</option>
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
           </select>
         </div>
 
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
-            Category
+            Type
           </label>
           <select
-            value={form.reportType}
+            value={form.type}
             onChange={(e) =>
               setForm((s) => ({
                 ...s,
-                reportType: e.target.value as ReportType,
+                type: e.target.value as ReportType,
               }))
             }
             className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
@@ -166,27 +185,6 @@ function NewReport({ onAddReport }: NewReportProps) {
             <option value="safety">Safety</option>
             <option value="environment">Environment</option>
             <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Assigned Unit
-          </label>
-          <select
-            value={form.assignedUnit}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                assignedUnit: e.target.value as AssignedUnit,
-              }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="maintenance">Maintenance</option>
-            <option value="police">Police</option>
-            <option value="environmental">Environmental</option>
-            <option value="general">General</option>
           </select>
         </div>
 
@@ -227,11 +225,19 @@ function NewReport({ onAddReport }: NewReportProps) {
           <button
             type="submit"
             className={`px-4 py-2 text-white rounded ${
-              form.title && form.description && form.location
+              form.title &&
+              form.description &&
+              form.location &&
+              !submitReportMutation.isPending
                 ? "bg-blue-600 hover:bg-blue-700"
                 : "bg-gray-300 cursor-not-allowed"
             }`}
-            disabled={!form.title || !form.description || !form.location}
+            disabled={
+              !form.title ||
+              !form.description ||
+              !form.location ||
+              submitReportMutation.isPending
+            }
           >
             Add report
           </button>
