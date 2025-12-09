@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import type {
-  AssignedUnit,
   CreateReportRequest,
   PriorityType,
   Report,
@@ -21,7 +20,6 @@ function NewReport({ onAddReport }: NewReportProps) {
     location: string;
     priority: PriorityType;
     reportType: ReportType;
-    assignedUnit: AssignedUnit;
   };
 
   const initialForm: FormState = {
@@ -30,7 +28,6 @@ function NewReport({ onAddReport }: NewReportProps) {
     location: "",
     priority: "Normal",
     reportType: "other",
-    assignedUnit: "general",
   };
 
   const [form, setForm] = useState<FormState>(initialForm);
@@ -187,27 +184,6 @@ function NewReport({ onAddReport }: NewReportProps) {
             <option value="safety">Safety</option>
             <option value="environment">Environment</option>
             <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Assigned Unit
-          </label>
-          <select
-            value={form.assignedUnit}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                assignedUnit: e.target.value as AssignedUnit,
-              }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="maintenance">Maintenance</option>
-            <option value="police">Police</option>
-            <option value="environmental">Environmental</option>
-            <option value="general">General</option>
           </select>
         </div>
 

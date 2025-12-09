@@ -43,7 +43,6 @@ export interface CreateReportRequest {
   location: string;
   priority: PriorityType;
   reportType: ReportType;
-  assignedUnit: AssignedUnit; // TODO remove in the future, it should be assigned by moderator instead
 }
 
 export function createReportRequest(
@@ -58,7 +57,7 @@ export function createReportRequest(
     status: "New",
     author: "Paweł Kowalski",
     reportType: createReportRequest.reportType,
-    assignedUnit: createReportRequest.assignedUnit,
+    assignedUnit: "general",
     createdAt: new Date(),
   };
   return response;

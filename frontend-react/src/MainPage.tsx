@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "./components/Header";
 import StatsCard from "./components/StatsCard";
 import MapSection from "./components/MapSection";
@@ -6,6 +7,7 @@ import ReportsList from "./components/ReportList";
 import ModeratorPanel from "./components/ModeratorPanel";
 import NewReport from "./components/NewReport";
 import type { User, Report, GlobalStats} from "./types";
+import { getReports, getMyReports } from "./services/reportService";
 
 
 function MainPage() {
@@ -16,41 +18,44 @@ function MainPage() {
     role: "user",
   });
 
-  const [reports, setReports] = useState<Report[]>([
-    {
-      title: "Pothole on Główna Street",
-      description:
-        "Large pothole in the asphalt, a hazard for drivers. Approximately 50 cm in diameter.",
-      location: "Główna St 15, Warsaw",
-      priority: "High",
-      status: "Resolved",
-      author: user.username,
-      reportType: "infrastructure",
-      assignedUnit: "maintenance",
-      createdAt: new Date(),
-      reportID: "rpt-001",
-    },
-    {
-      title: "Broken streetlight on Słoneczna",
-      description: "Streetlight is out, area is poorly lit at night.",
-      location: "Słoneczna 3, Warsaw",
-      priority: "Normal",
-      status: "New",
-      author: "Inna Osoba",
-      reportType: "infrastructure",
-      assignedUnit: "general",
-      createdAt: new Date(),
-      reportID: "rpt-002",
-    },
-  ]);
-
-  const [globalStats] = useState<GlobalStats>({
-    totalReports: 1200,
-    resolvedReports: 950,
+  const [reports, setReports] = useState<Report[]>([]);
+  const [globalStats, setGlobalStats] = useState<GlobalStats>({
+    totalReports: 0,
+    resolvedReports: 0,
   });
 
   const [view, setView] = useState<'nearby' | 'mine'>('nearby');
   const [showNewReport, setShowNewReport] = useState(false);
+
+  // Fetch all reports
+  const { data: allReports = [], isLoading: isLoadingAll } = useQuery({
+    queryKey: ['reports'],
+    queryFn: getReports,
+  });
+
+  // Fetch user's reports
+  const { data: myReports = [], isLoading: isLoadingMy } = useQuery({
+    queryKey: ['myReports'],
+    queryFn: getMyReports,
+  });
+
+  // Update reports state when data is fetched
+  useEffect(() => {
+    if (view === 'nearby') {
+      setReports(allReports);
+    } else if (view === 'mine') {
+      setReports(myReports);
+    }
+  }, [view, allReports, myReports]);
+
+  // Update global stats
+  useEffect(() => {
+    const resolved = allReports.filter((r) => r.status === 'Resolved').length;
+    setGlobalStats({
+      totalReports: allReports.length,
+      resolvedReports: resolved,
+    });
+  }, [allReports]);
 
   const handleAddReport = (report: Report) => {
     const reportWithAuthor: Report = { ...report, author: report.author ?? user.username };
@@ -144,6 +149,7 @@ function MainPage() {
               <ReportsList
                 reports={view === 'mine' ? reports.filter((r) => r.author === user.username) : reports}
                 title={view === 'mine' ? 'My reports' : 'Reports in your area'}
+                isLoading={view === 'mine' ? isLoadingMy : isLoadingAll}
               />
             )}
           </div>

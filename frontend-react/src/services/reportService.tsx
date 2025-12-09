@@ -9,7 +9,7 @@ export const getReport = async (reportID: string): Promise<Report> => {
 
 };
 
-export const createReport = async (report: Partial<Report>): Promise<Report> => {
+export const createReport = async (report: Partial<CreateReportRequest>): Promise<Report> => {
     const res = await axios.post<Report>(`${API_URL}/reports`, report, {
         headers: { 'Content-Type': 'application/json' },
     });
@@ -27,7 +27,6 @@ export const submitReport = async (payload: CreateReportRequest, file?: File): P
             fd.append('location', payload.location);
             fd.append('priority', payload.priority);
             fd.append('reportType', payload.reportType);
-            fd.append('assignedUnit', payload.assignedUnit);
             fd.append('file', file, file.name);
 
             const res = await axios.post<Report>(`${API_URL}/reports`, fd, {
@@ -41,6 +40,29 @@ export const submitReport = async (payload: CreateReportRequest, file?: File): P
     } catch (err) {
         const message = axios.isAxiosError(err) && err.response?.data ? JSON.stringify(err.response.data) : String(err);
         throw new Error(`Failed to submit report: ${message}`);
+    }
+};
+
+export const getReports = async (): Promise<Report[]> => {
+    try {
+        const res = await axios.get<Report[]>(`${API_URL}/reports`);
+        return res.data;
+    } catch (err) {
+        const message = axios.isAxiosError(err) && err.response?.data ? JSON.stringify(err.response.data) : String(err);
+        throw new Error(`Failed to fetch reports: ${message}`);
+    }
+};
+
+export const getMyReports = async (): Promise<Report[]> => {
+    try {
+        const token = localStorage.getItem('jwt');
+        const res = await axios.get<Report[]>(`${API_URL}/reports/my`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data;
+    } catch (err) {
+        const message = axios.isAxiosError(err) && err.response?.data ? JSON.stringify(err.response.data) : String(err);
+        throw new Error(`Failed to fetch user reports: ${message}`);
     }
 };
 
