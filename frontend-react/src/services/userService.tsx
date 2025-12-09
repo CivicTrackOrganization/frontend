@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { User } from "../types";
 
 export interface SignUpRequest {
   username: string;
@@ -25,6 +26,14 @@ export interface SignInResponse {
   refresh: string;
 }
 
+export interface UserInfo {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export const signUp = async (data: SignUpRequest): Promise<SignUpResponse> => {
@@ -48,5 +57,12 @@ export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
       headers: { "Content-Type": "application/json" },
     }
   );
+  return response.data;
+};
+
+export const fetchUserInfo = async (accessToken: string): Promise<UserInfo> => {
+  const response = await axios.get<UserInfo>(`${API_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
   return response.data;
 };

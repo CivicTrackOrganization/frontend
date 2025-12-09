@@ -1,6 +1,6 @@
-export type StatusType = "New" | "In Progress" | "Resolved" | "Rejected";
+export type StatusType = "new" | "in_progress" | "resolved" | "rejected";
 
-export type PriorityType = "Low" | "Normal" | "High";
+export type PriorityType = "low" | "normal" | "high";
 
 export type ReportType = "infrastructure" | "safety" | "environment" | "other";
 
@@ -11,16 +11,16 @@ export type AssignedUnit =
   | "general";
 
 export interface Report {
-  reportID: string;
+  id: string;
   title: string;
   description: string;
   location: string;
   priority: PriorityType;
   status: StatusType;
   author: string;
-  reportType: ReportType;
+  type: ReportType;
   assignedUnit: AssignedUnit;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export type UserRole = "user" | "moderator" | "admin";
@@ -28,7 +28,6 @@ export type UserRole = "user" | "moderator" | "admin";
 export interface User {
   username: string;
   reputation: number;
-  reports: number;
   role: UserRole;
 }
 
@@ -42,23 +41,5 @@ export interface CreateReportRequest {
   description: string;
   location: string;
   priority: PriorityType;
-  reportType: ReportType;
-}
-
-export function createReportRequest(
-  createReportRequest: CreateReportRequest
-): Report {
-  const response: Report = {
-    reportID: crypto.randomUUID(),
-    title: createReportRequest.title,
-    description: createReportRequest.description,
-    location: createReportRequest.location,
-    priority: createReportRequest.priority,
-    status: "New",
-    author: "Paweł Kowalski",
-    reportType: createReportRequest.reportType,
-    assignedUnit: "general",
-    createdAt: new Date(),
-  };
-  return response;
+  type: ReportType;
 }

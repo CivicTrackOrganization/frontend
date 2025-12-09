@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Report } from '../types';
+import type { Report, CreateReportRequest } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -10,13 +10,15 @@ export const getReport = async (reportID: string): Promise<Report> => {
 };
 
 export const createReport = async (report: Partial<CreateReportRequest>): Promise<Report> => {
-    const res = await axios.post<Report>(`${API_URL}/reports`, report, {
-        headers: { 'Content-Type': 'application/json' },
+    const accessToken = localStorage.getItem('accessToken');
+    const res = await axios.post<Report>(`${API_URL}/reports/`, report, {
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${accessToken}`
+        },
     });
     return res.data;
 };
-// TODO move to newreport
-import type { CreateReportRequest } from '../types';
 
 export const submitReport = async (payload: CreateReportRequest, file?: File): Promise<Report> => {
     try {
@@ -26,10 +28,10 @@ export const submitReport = async (payload: CreateReportRequest, file?: File): P
             fd.append('description', payload.description);
             fd.append('location', payload.location);
             fd.append('priority', payload.priority);
-            fd.append('reportType', payload.reportType);
+            fd.append('type', payload.type);
             fd.append('file', file, file.name);
 
-            const res = await axios.post<Report>(`${API_URL}/reports`, fd, {
+            const res = await axios.post<Report>(`${API_URL}/reports/`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             return res.data;
@@ -45,7 +47,7 @@ export const submitReport = async (payload: CreateReportRequest, file?: File): P
 
 export const getReports = async (): Promise<Report[]> => {
     try {
-        const res = await axios.get<Report[]>(`${API_URL}/reports`);
+        const res = await axios.get<Report[]>(`${API_URL}/reports/`);
         return res.data;
     } catch (err) {
         const message = axios.isAxiosError(err) && err.response?.data ? JSON.stringify(err.response.data) : String(err);
@@ -55,9 +57,12 @@ export const getReports = async (): Promise<Report[]> => {
 
 export const getMyReports = async (): Promise<Report[]> => {
     try {
-        const token = localStorage.getItem('jwt');
-        const res = await axios.get<Report[]>(`${API_URL}/reports/my`, {
-            headers: { Authorization: `Bearer ${token}` },
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            throw new Error('Authentication required: No accessToken found.');
+        }
+        const res = await axios.get<Report[]>(`${API_URL}/reports/me/`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
         });
         return res.data;
     } catch (err) {

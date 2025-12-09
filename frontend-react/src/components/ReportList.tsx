@@ -21,7 +21,7 @@ function ReportsList({ reports, title = "Reports in your area", isLoading = fals
           </div>
         ) : reports.length > 0 ? (
           reports.map((report) => (
-            <ReportItem key={report.reportID} report={report} />
+            <ReportItem key={report.id} report={report} />
           ))
         ) : (
           <div className="flex items-center justify-center h-full">
