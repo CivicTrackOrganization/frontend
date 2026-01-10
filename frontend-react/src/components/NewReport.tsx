@@ -27,7 +27,7 @@ function NewReport() {
   };
 
   const [form, setForm] = useState<FormState>(initialForm);
-  // const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -43,20 +43,15 @@ function NewReport() {
       ...form,
     };
 
-    // `FileList.item` may return `File | null` and indexing can be `File | undefined`.
-    // Normalize to `File | undefined` so it matches the mutation's `file?: File` type.
-    const maybeFile = fileRef.current?.files?.item(0);
-    const file: File | undefined = maybeFile ?? undefined;
-
-    submitReportMutation.mutate({ payload: requestData, file });
+    submitReportMutation.mutate({ payload: requestData, image: image });
   };
 
   const submitReportMutation = useMutation<
     Report,
     Error,
-    { payload: CreateReportRequest; file?: File }
+    { payload: CreateReportRequest; image: File | null }
   >({
-    mutationFn: ({ payload }) => createReport(payload),
+    mutationFn: ({ payload, image }) => createReport(payload, image),
     onSuccess: () => {
       setForm(initialForm);
       setPreview(null);
@@ -201,11 +196,11 @@ function NewReport() {
                 const f = e.target.files && e.target.files[0];
                 if (f) {
                   if (preview) URL.revokeObjectURL(preview);
-                  // setImage(f);
+                  setImage(f);
                   setPreview(URL.createObjectURL(f));
                 } else {
                   if (preview) URL.revokeObjectURL(preview);
-                  // setImage(null);
+                  setImage(null);
                   setPreview(null);
                 }
               }}

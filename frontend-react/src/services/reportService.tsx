@@ -9,15 +9,26 @@ export const getReport = async (reportID: string): Promise<Report> => {
 };
 
 export const createReport = async (
-  report: CreateReportRequest
+  report: CreateReportRequest,
+  image: File | null
 ): Promise<Report> => {
   const accessToken = localStorage.getItem("accessToken");
   if (!accessToken) {
     throw new Error("Authentication required: No accessToken found.");
   }
-  const res = await axios.post<Report>(`${API_URL}/reports/`, report, {
+
+  const formData = new FormData();
+
+  Object.entries(report).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  
+  if (image) {
+    formData.append("image", image);
+  }
+
+  const res = await axios.post<Report>(`${API_URL}/reports/`, formData, {
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
   });
