@@ -12,6 +12,9 @@ export const createReport = async (
   report: CreateReportRequest
 ): Promise<Report> => {
   const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) {
+    throw new Error("Authentication required: No accessToken found.");
+  }
   const res = await axios.post<Report>(`${API_URL}/reports/`, report, {
     headers: {
       "Content-Type": "application/json",
