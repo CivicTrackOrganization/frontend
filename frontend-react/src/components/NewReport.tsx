@@ -58,7 +58,10 @@ function NewReport() {
       queryClient.invalidateQueries({ queryKey: MY_REPORTS_KEY });
       queryClient.invalidateQueries({ queryKey: ALL_REPORTS_KEY });
       toast.success("Report successfully submitted.");
-      if (fileRef.current) fileRef.current.value = "";
+      if (fileRef.current) {
+        fileRef.current.value = "";
+        setImage(null);
+      }
     },
     onError: (error) => {
       console.error("Failed to submit report", error);
