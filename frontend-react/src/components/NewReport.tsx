@@ -7,7 +7,7 @@ import type {
   Report,
   ReportType,
 } from "../types";
-import { submitReport } from "../services/reportService";
+import { createReport } from "../services/reportService";
 
 function NewReport() {
   type FormState = {
@@ -56,7 +56,7 @@ function NewReport() {
     Error,
     { payload: CreateReportRequest; file?: File }
   >({
-    mutationFn: ({ payload, file }) => submitReport(payload, file),
+    mutationFn: ({ payload }) => createReport(payload),
     onSuccess: () => {
       setForm(initialForm);
       setPreview(null);

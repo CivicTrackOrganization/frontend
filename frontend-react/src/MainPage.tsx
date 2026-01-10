@@ -9,7 +9,7 @@ import ReportsList from "./components/ReportList";
 import StatsCard from "./components/StatsCard";
 import { getMyReports, getReports } from "./services/reportService";
 import { fetchUserInfo, type UserInfo } from "./services/userService";
-import type { GlobalStats, User } from "./types";
+import type { Report, User } from "./types";
 
 function MainPage() {
   const [view, setView] = useState<"all" | "mine">("all");
@@ -18,13 +18,20 @@ function MainPage() {
   const navigate = useNavigate();
 
   // Fetch all reports
-  const { data: allReports = [], isLoading: isLoadingAll } = useQuery({
-    queryKey: ["reports"],
+  const {
+    data: allReports,
+    isLoading: isLoadingAll,
+    isError: isErrorAll,
+  } = useQuery({
     queryFn: getReports,
+    queryKey: ["reports"],
   });
 
-  // Fetch user's reports
-  const { data: myReports = [], isLoading: isLoadingMy } = useQuery({
+  const {
+    data: myReports,
+    isLoading: isLoadingMy,
+    isError: isErrorMy,
+  } = useQuery({
     queryKey: ["myReports"],
     queryFn: getMyReports,
   });
@@ -33,13 +40,13 @@ function MainPage() {
   const {
     data: userInfo,
     isLoading: isLoadingUser,
-    isError: isUserError,
+    error: userError,
   } = useQuery<UserInfo, Error>({
     queryKey: ["userInfo", accessToken],
     queryFn: () => fetchUserInfo(accessToken!),
     enabled: !!accessToken,
     staleTime: Infinity,
-    retry: false
+    retry: false,
   });
 
   const user: User | null = userInfo
@@ -53,16 +60,9 @@ function MainPage() {
   const currentReports = view === "all" ? allReports : myReports;
   const currentReportsLoading = view === "all" ? isLoadingAll : isLoadingMy;
 
-  const resolvedReportsCount = allReports.filter(
-    (r) => r.status === "resolved"
-  ).length;
-
-  const globalStats: GlobalStats = {
-    totalReports: allReports.length,
-    resolvedReports: resolvedReportsCount,
+  const calculateResolvedReportsCount = (reports: Array<Report>) => {
+    return reports.filter((r) => r.status === "resolved").length;
   };
-
-  const activeGlobal = globalStats.totalReports - globalStats.resolvedReports;
 
   useEffect(() => {
     if (!accessToken) {
@@ -72,12 +72,20 @@ function MainPage() {
   }, [accessToken, navigate]);
 
   useEffect(() => {
-    if (isUserError) {
+    if (!userError) return;
+
+    const isAuthError =
+      userError instanceof Error &&
+      (userError.message.includes("401") || userError.message.includes("403"));
+
+    if (isAuthError) {
       toast.error("Token expired, please log in again.");
       localStorage.removeItem("accessToken");
       navigate("/register-login", { replace: true });
+    } else {
+      toast.error("Failed to load user data. Please refresh the page.");
     }
-  }, [isUserError, navigate]);
+  }, [userError, navigate]);
 
   if (!accessToken || isLoadingUser || !user) {
     return (
@@ -100,8 +108,18 @@ function MainPage() {
             return (
               <>
                 <StatsCard title="Your reputation" value={user.reputation} />
-                <StatsCard title="Your reports" value={myReports.length} />
-                <StatsCard title="Active reports" value={activeGlobal} />
+                {!isLoadingMy && !isErrorMy && myReports && (
+                  <StatsCard title="Your reports" value={myReports.length} />
+                )}
+                {!isLoadingAll && !isErrorAll && allReports && (
+                  <StatsCard
+                    title="Active reports"
+                    value={
+                      allReports.length -
+                      calculateResolvedReportsCount(allReports)
+                    }
+                  />
+                )}
               </>
             );
           })()}
@@ -187,11 +205,15 @@ function MainPage() {
           </div>
 
           <div>
-            <ReportsList
-              reports={currentReports}
-              title={view === "mine" ? "My reports" : "All reports"}
-              isLoading={currentReportsLoading}
-            />
+            {!currentReports ? (
+              <p>Loading reports...</p>
+            ) : (
+              <ReportsList
+                reports={currentReports}
+                title={view === "mine" ? "My reports" : "All reports"}
+                isLoading={currentReportsLoading}
+              />
+            )}
           </div>
         </div>
       </main>
