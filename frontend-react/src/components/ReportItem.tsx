@@ -6,7 +6,7 @@ interface ReportItemProps {
 
 function ReportItem({ report }: ReportItemProps) {
   return (
-    <div className="p-4 mb-3 bg-white rounded-lg shadow-sm h-32">
+    <div className="p-4 mb-3 bg-white rounded-lg shadow-sm min-h-32">
       <div className="flex items-start justify-between gap-3 h-full">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
