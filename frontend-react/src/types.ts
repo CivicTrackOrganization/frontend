@@ -11,9 +11,13 @@ export type AssignedUnit =
   | "general";
 
 export interface Report {
-  id: string;
+  id: number;
   title: string;
   description: string;
+  votesFor: number;
+  votesAgainst: number;
+  userVoteType: number;
+  image: string;
   location: string;
   priority: PriorityType;
   status: StatusType;
