@@ -1,8 +1,8 @@
 import { privateApi } from "../clients";
-import type { CreateReportRequest, Report } from "../types";
+import type { CreateReportRequest, Report, ReportDetailed } from "../types";
 
-export const getReport = async (reportID: string): Promise<Report> => {
-  const res = await privateApi.get<Report>(`/reports/${reportID}/`);
+export const getReport = async (reportId: number): Promise<ReportDetailed> => {
+  const res = await privateApi.get(`/reports/${reportId}/`);
   return res.data;
 };
 

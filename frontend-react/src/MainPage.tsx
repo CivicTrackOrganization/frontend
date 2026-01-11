@@ -10,10 +10,12 @@ import StatsCard from "./components/StatsCard";
 import { getMyReports, getReports } from "./services/reportService";
 import { fetchUserInfo, type UserInfo } from "./services/userService";
 import type { Report, User } from "./types";
+import ReportDetailsModal from "./components/ReportDetailsModal";
 
 function MainPage() {
   const [view, setView] = useState<"all" | "mine">("all");
   const [showNewReport, setShowNewReport] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 
   const navigate = useNavigate();
 
@@ -71,7 +73,7 @@ function MainPage() {
     }
   }, [accessToken, navigate]);
 
-  useEffect(() => {
+  useEffect(() => { // TODO remove this part
     if (!userError) return;
 
     const isAuthError =
@@ -212,11 +214,19 @@ function MainPage() {
                 reports={currentReports}
                 title={view === "mine" ? "My reports" : "All reports"}
                 isLoading={currentReportsLoading}
+                onReportSelected={setSelectedReportId}
               />
             )}
           </div>
         </div>
       </main>
+
+      {selectedReportId && (
+        <ReportDetailsModal
+          reportId={selectedReportId}
+          onClose={() => setSelectedReportId(null)}
+        />
+      )}
     </div>
   );
 }

@@ -5,12 +5,14 @@ interface ReportsListProps {
   reports: Report[];
   title?: string;
   isLoading?: boolean;
+  onReportSelected: (reportId: number) => void;
 }
 
 function ReportsList({
   reports,
   title = "Reports in your area",
   isLoading = false,
+  onReportSelected,
 }: ReportsListProps) {
   return (
     <div className="h-full bg-white shadow-sm rounded-xl">
@@ -27,7 +29,11 @@ function ReportsList({
           </div>
         ) : reports.length > 0 ? (
           reports.map((report) => (
-            <ReportItem key={report.id} report={report} />
+            <ReportItem
+              key={report.id}
+              report={report}
+              onClick={() => onReportSelected(report.id)}
+            />
           ))
         ) : (
           <div className="flex items-center justify-center h-full">

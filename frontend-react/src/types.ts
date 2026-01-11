@@ -17,6 +17,7 @@ export interface Report {
   votesFor: number;
   votesAgainst: number;
   userVoteType: number;
+  commentCount: number;
   image: string;
   location: string;
   priority: PriorityType;
@@ -25,6 +26,19 @@ export interface Report {
   type: ReportType;
   assignedUnit: AssignedUnit;
   createdAt: string;
+}
+
+export interface Comment {
+  id: number;
+  report: number;
+  content: string;
+  isOfficialResponse: boolean;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface ReportDetailed extends Report {
+  comments: Array<Comment>;
 }
 
 export type UserRole = "user" | "moderator" | "admin";

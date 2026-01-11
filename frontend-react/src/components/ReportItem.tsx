@@ -7,9 +7,10 @@ import type { Report } from "../types";
 
 interface ReportItemProps {
   report: Report;
+  onClick: () => void;
 }
 
-function ReportItem({ report }: ReportItemProps) {
+function ReportItem({ report, onClick }: ReportItemProps) {
   const queryClient = useQueryClient();
 
   const createVoteMutation = useMutation({
@@ -96,7 +97,10 @@ function ReportItem({ report }: ReportItemProps) {
   };
 
   return (
-    <div className="p-4 mb-3 bg-white rounded-lg shadow-sm min-h-42 h-42">
+    <div
+      className="p-4 mb-3 bg-white rounded-lg shadow-sm min-h-42 h-42 cursor-pointer hover:scale-105 transition-transform hover:shadow-md"
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between gap-3 h-3/4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -142,7 +146,7 @@ function ReportItem({ report }: ReportItemProps) {
         </div>
         <div className="bg-blue-50 py-1 px-2 rounded-md flex items-center gap-2 hover:bg-blue-100 transition-colors cursor-pointer">
           <PiChatCircle />
-          <span className="text-sm">0</span>
+          <span className="text-sm">{report.commentCount}</span>
         </div>
       </div>
     </div>
