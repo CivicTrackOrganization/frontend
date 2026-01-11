@@ -7,7 +7,7 @@ interface AxiosInterceptorProps {
   children: React.ReactNode;
 }
 
-const AxioxInterceptor = ({ children }: AxiosInterceptorProps) => {
+const AxiosInterceptor = ({ children }: AxiosInterceptorProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +18,7 @@ const AxioxInterceptor = ({ children }: AxiosInterceptorProps) => {
           toast.error("Session expired. Please log in again.");
           navigate("/register-login", { replace: true });
         }
+        return Promise.reject(error);
       }
     );
 
@@ -27,4 +28,4 @@ const AxioxInterceptor = ({ children }: AxiosInterceptorProps) => {
   return children;
 };
 
-export default AxioxInterceptor;
+export default AxiosInterceptor;

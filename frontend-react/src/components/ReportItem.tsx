@@ -44,8 +44,13 @@ function ReportItem({ report }: ReportItemProps) {
     },
   });
 
+  const isAnyMutationPending =
+    createVoteMutation.isPending ||
+    deleteVoteMutation.isPending ||
+    patchVoteMutation.isPending;
+
   const upvote = () => {
-    if (createVoteMutation.isPending) return;
+    if (isAnyMutationPending) return;
 
     const request = {
       reportId: report.id,
@@ -56,7 +61,7 @@ function ReportItem({ report }: ReportItemProps) {
   };
 
   const downvote = () => {
-    if (createVoteMutation.isPending) return;
+    if (isAnyMutationPending) return;
 
     const request = {
       reportId: report.id,
@@ -67,13 +72,13 @@ function ReportItem({ report }: ReportItemProps) {
   };
 
   const removeVote = () => {
-    if (deleteVoteMutation.isPending) return;
+    if (isAnyMutationPending) return;
 
     deleteVoteMutation.mutate({ reportId: report.id });
   };
 
   const updateVote = (vote: number) => {
-    if (patchVoteMutation.isPending) return;
+    if (isAnyMutationPending) return;
 
     patchVoteMutation.mutate({ reportId: report.id, vote });
   };
