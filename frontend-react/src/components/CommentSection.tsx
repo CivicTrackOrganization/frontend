@@ -61,6 +61,8 @@ const CommentSection = ({
               if (newCommentContent.trim()) {
                 onCommentSend(newCommentContent);
                 setNewCommentContent("");
+              } else {
+                toast.error("Comment content cannot be empty.");
               }
             }
           }}

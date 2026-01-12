@@ -75,7 +75,7 @@ function ReportItem({ report, onClick }: ReportItemProps) {
             <span className="text-sm">{report.votesAgainst}</span>
           </button>
         </div>
-        <div className="bg-blue-50 py-1 px-2 rounded-md flex items-center gap-2 hover:bg-blue-100 transition-colors cursor-pointer">
+        <div className="bg-blue-50 py-1 px-2 rounded-md flex items-center gap-2">
           <PiChatCircle />
           <span className="text-sm">{report.commentCount}</span>
         </div>

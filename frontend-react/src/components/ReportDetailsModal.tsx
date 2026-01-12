@@ -74,7 +74,7 @@ const ReportDetails = ({ reportId, userId, onClose }: ReportDetailsProps) => {
       onClick={onClose}
     >
       <div
-        className="bg-white w-2/3 p-3 rounded-md max-h-200 h-3/4"
+        className="bg-white w-2/3 p-3 rounded-md h-3/4"
         onClick={(e) => {
           e.stopPropagation();
         }}
