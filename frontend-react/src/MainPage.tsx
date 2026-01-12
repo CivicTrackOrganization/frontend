@@ -1,23 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import MapSection from "./components/MapSection";
 import NewReport from "./components/NewReport";
+import ReportDetailsModal from "./components/ReportDetailsModal";
 import ReportsList from "./components/ReportList";
 import StatsCard from "./components/StatsCard";
 import { getMyReports, getReports } from "./services/reportService";
 import { fetchUserInfo, type UserInfo } from "./services/userService";
 import type { Report, User } from "./types";
-import ReportDetailsModal from "./components/ReportDetailsModal";
 
 function MainPage() {
   const [view, setView] = useState<"all" | "mine">("all");
   const [showNewReport, setShowNewReport] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
-
-  const navigate = useNavigate();
 
   const {
     data: allReports,
