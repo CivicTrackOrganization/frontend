@@ -1,15 +1,20 @@
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { PiChatCircle } from "react-icons/pi";
 import type { Comment } from "../types";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import { displayIsoString } from "../utils/dateUtils";
+import CommentBubble from "./CommentBubble";
 
 interface CommentSectionProps {
   comments: Array<Comment>;
+  userId: number;
   onCommentSend: (content: string) => void;
 }
 
-const CommentSection = ({ comments, onCommentSend }: CommentSectionProps) => {
+const CommentSection = ({
+  comments,
+  userId,
+  onCommentSend,
+}: CommentSectionProps) => {
   const officialComments = comments.filter(
     (comment) => comment.isOfficialResponse
   );
@@ -22,38 +27,22 @@ const CommentSection = ({ comments, onCommentSend }: CommentSectionProps) => {
 
   return (
     <section className="py-3">
-      <p className="mb-2">Comments ({comments.length})</p>
+      <p className="mb-3">Comments ({comments.length})</p>
       <div className="flex flex-col gap-4">
         {officialComments.map((officialComment) => (
-          <div
-            key={officialComment.id}
-            className="bg-blue-100 border-blue-100 p-2"
-          >
-            <header className="flex justify-between items-center">
-              <div className="flex items-center">
-                <span className="text-sm">{officialComment.createdBy}</span>
-                <span className="bg-black px-2 py-1 text-white rounded-xl text-sm">
-                  Offical response
-                </span>
-              </div>
-              <span className="text-gray-400 text-xs">
-                {officialComment.createdAt}
-              </span>
-            </header>
-            <p>{officialComment.content}</p>
-          </div>
+          <CommentBubble
+            comment={officialComment}
+            isOfficialResponse={true}
+            isMine={officialComment.authorId === userId}
+          />
         ))}
 
         {communityComments.map((communityComment) => (
-          <div key={communityComment.id} className="bg-gray-100 p-3 rounded-md">
-            <header className="flex justify-between items-center mb-2">
-              <span className="text-sm">{communityComment.createdBy}</span>
-              <span className="text-gray-400 text-xs">
-                {displayIsoString(communityComment.createdAt)}
-              </span>
-            </header>
-            <p>{communityComment.content}</p>
-          </div>
+          <CommentBubble
+            comment={communityComment}
+            isOfficialResponse={false}
+            isMine={communityComment.authorId === userId}
+          />
         ))}
       </div>
 

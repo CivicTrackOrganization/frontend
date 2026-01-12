@@ -1,19 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { FaRegThumbsDown, FaRegThumbsUp, FaTimes } from "react-icons/fa";
-import { getReport } from "../services/reportService";
-import CommentSection from "./CommentSection";
-import type { CommentCreationRequest } from "../types";
-import { createComment } from "../services/commentService";
 import toast from "react-hot-toast";
+import {
+  FaMapMarkerAlt,
+  FaRegClock,
+  FaRegThumbsDown,
+  FaRegThumbsUp,
+  FaTimes,
+  FaUser,
+} from "react-icons/fa";
 import { useReportVotes } from "../hooks/useReportVotes";
+import { createComment } from "../services/commentService";
+import { getReport } from "../services/reportService";
+import type { CommentCreationRequest } from "../types";
+import CommentSection from "./CommentSection";
+import { displayDate } from "../utils/dateUtils";
+import clsx from "clsx";
 
 interface ReportDetailsProps {
   reportId: number;
+  userId: number;
   onClose: () => void;
 }
 
-const ReportDetails = ({ reportId, onClose }: ReportDetailsProps) => {
+const ReportDetails = ({ reportId, userId, onClose }: ReportDetailsProps) => {
   const queryClient = useQueryClient();
 
   const {
@@ -79,7 +89,7 @@ const ReportDetails = ({ reportId, onClose }: ReportDetailsProps) => {
               <span className="text-xl font-semibold">{report.title}</span>
               <FaTimes
                 onClick={onClose}
-                className="cursor-pointer hover:opacity-70"
+                className="cursor-pointer hover:text-gray-500 transition-colors"
               />
             </header>
             <div className="h-11/12 overflow-scroll scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent hover:scrollbar-thumb-gray-200 transition-colors duration-300">
@@ -96,25 +106,34 @@ const ReportDetails = ({ reportId, onClose }: ReportDetailsProps) => {
               </div>
               <section className="border-b border-b-gray-300 py-3">
                 {report.image && (
-                  <img className="shadow-md mb-2" src={report.image} />
+                  <img
+                    className="w-full h-full object-cover mb-2"
+                    src={report.image}
+                  />
                 )}
                 <span className="text-lg text-gray-600">
                   {report.description}
                 </span>
-                <div className="flex flex-col text-md my-2">
-                  <span className="text-md text-gray-500">
-                    Author: {report.author}
+                <div className="flex flex-col gap-1 text-md my-3">
+                  <span className="flex items-center gap-2 text-sm text-gray-500">
+                    <FaUser />
+                    <span>Author: {report.author}</span>
                   </span>
-                  <span className="text-md text-gray-500">
-                    {report.location}
+                  <span className="flex justify-start items-center gap-2 text-sm text-gray-500">
+                    <FaMapMarkerAlt />
+                    <span>{report.location}</span>
                   </span>
-                  <span className="text-md text-gray-500">
-                    {report.createdAt}
+                  <span className="flex items-center gap-2 text-sm text-gray-500">
+                    <FaRegClock />
+                    <span>{displayDate(report.createdAt)}</span>
                   </span>
                 </div>
                 <div className="flex gap-3 my-2 text-sm">
                   <button
-                    className="flex justify-center items-center gap-1 text-green-600 border border-green-300 px-2 py-1 rounded-md cursor-pointer hover:bg-green-50 transition-colors"
+                    className={clsx(
+                      "flex justify-center items-center gap-1 text-green-600 border border-green-300 px-2 py-1 rounded-md cursor-pointer hover:bg-green-50 transition-colors",
+                      report.userVoteType === 1 && "bg-green-50"
+                    )}
                     onClick={() => handleVoteAction(report.userVoteType, 1)}
                     disabled={isVotePending}
                   >
@@ -122,7 +141,10 @@ const ReportDetails = ({ reportId, onClose }: ReportDetailsProps) => {
                     <span>Agreed {report.votesFor}</span>
                   </button>
                   <button
-                    className="flex justify-center items-center gap-1 text-red-600 border border-red-300 px-2 py-1 rounded-md cursor-pointer hover:bg-red-50 transition-colors"
+                    className={clsx(
+                      "flex justify-center items-center gap-1 text-red-600 border border-red-300 px-2 py-1 rounded-md cursor-pointer hover:bg-red-50 transition-colors",
+                      report.userVoteType === -1 && "bg-red-50"
+                    )}
                     onClick={() => handleVoteAction(report.userVoteType, -1)}
                     disabled={isVotePending}
                   >
@@ -134,6 +156,7 @@ const ReportDetails = ({ reportId, onClose }: ReportDetailsProps) => {
               <CommentSection
                 comments={report.comments}
                 onCommentSend={sendComment}
+                userId={userId}
               />
             </div>
           </>

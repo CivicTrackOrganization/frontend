@@ -35,6 +35,7 @@ export interface Comment {
   isOfficialResponse: boolean;
   createdAt: string;
   createdBy: string;
+  authorId: number;
 }
 
 export interface CommentCreationRequest {

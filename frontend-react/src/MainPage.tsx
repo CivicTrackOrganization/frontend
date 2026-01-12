@@ -19,7 +19,6 @@ function MainPage() {
 
   const navigate = useNavigate();
 
-  // Fetch all reports
   const {
     data: allReports,
     isLoading: isLoadingAll,
@@ -67,30 +66,11 @@ function MainPage() {
   };
 
   useEffect(() => {
-    if (!accessToken) {
-      toast.error("Please log in to access this page.");
-      navigate("/register-login", { replace: true });
-    }
-  }, [accessToken, navigate]);
-
-  useEffect(() => {
-    // TODO remove this part
     if (!userError) return;
-
-    const isAuthError =
-      userError instanceof Error &&
-      (userError.message.includes("401") || userError.message.includes("403"));
-
-    if (isAuthError) {
-      toast.error("Token expired, please log in again.");
-      localStorage.removeItem("accessToken");
-      navigate("/register-login", { replace: true });
-    } else {
-      toast.error("Failed to load user data. Please refresh the page.");
-    }
+    toast.error("Failed to load user data. Please refresh the page.");
   }, [userError, navigate]);
 
-  if (!accessToken || isLoadingUser || !user) {
+  if (isLoadingUser || !user || !userInfo) {
     return (
       <div className="min-h-screen w-full bg-linear-to-b from-gray-50 to-white flex justify-center items-center text-3xl">
         Loading user data...
@@ -226,6 +206,7 @@ function MainPage() {
         <ReportDetailsModal
           reportId={selectedReportId}
           onClose={() => setSelectedReportId(null)}
+          userId={userInfo.id}
         />
       )}
     </div>

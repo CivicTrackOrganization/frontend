@@ -2,6 +2,7 @@ import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
 import { PiChatCircle } from "react-icons/pi";
 import { useReportVotes } from "../hooks/useReportVotes";
 import type { Report } from "../types";
+import clsx from "clsx";
 
 interface ReportItemProps {
   report: Report;
@@ -13,7 +14,7 @@ function ReportItem({ report, onClick }: ReportItemProps) {
 
   return (
     <div
-      className="p-4 mb-3 bg-white rounded-lg shadow-sm min-h-42 h-42 cursor-pointer hover:scale-105 transition-transform hover:shadow-md"
+      className="p-4 mb-3 bg-white rounded-lg shadow-sm min-h-42 h-42 cursor-pointer hover:scale-[101%] transition-transform hover:shadow-md"
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3 h-3/4">
@@ -45,7 +46,10 @@ function ReportItem({ report, onClick }: ReportItemProps) {
       <div className="border-t border-t-gray-200 w-full mt-2 pt-2 flex justify-between items-center h-1/4">
         <div className="flex gap-5">
           <button
-            className="flex items-center gap-1 text-green-800 cursor-pointer hover:bg-green-50 transition-colors px-2 py-1 rounded-md"
+            className={clsx(
+              "flex items-center gap-1 text-green-800 cursor-pointer hover:bg-green-50 transition-colors px-2 py-1 rounded-md",
+              report.userVoteType === 1 && "bg-green-50"
+            )}
             onClick={(e) => {
               e.stopPropagation();
               handleVoteAction(report.userVoteType, 1);
@@ -56,7 +60,10 @@ function ReportItem({ report, onClick }: ReportItemProps) {
             <span className="text-sm">{report.votesFor}</span>
           </button>
           <button
-            className="flex items-center gap-1 text-red-600 cursor-pointer hover:bg-red-50 transition-colors px-2 py-1 rounded-md"
+            className={clsx(
+              "flex items-center gap-1 text-red-600 cursor-pointer hover:bg-red-50 transition-colors px-2 py-1 rounded-md",
+              report.userVoteType === -1 && "bg-red-50"
+            )}
             onClick={(e) => {
               e.stopPropagation();
               handleVoteAction(report.userVoteType, -1);
