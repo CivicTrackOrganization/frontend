@@ -75,7 +75,7 @@ const AxiosInterceptor = ({ children }: AxiosInterceptorProps) => {
             const { data } = await publicApi.post("/auth/refresh/", {
               refresh: storedRefreshToken,
             });
-            const newAccessToken = data.accessToken;
+            const newAccessToken = data.access;
             localStorage.setItem("accessToken", newAccessToken);
 
             processQueue(null, newAccessToken);

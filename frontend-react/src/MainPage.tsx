@@ -73,7 +73,8 @@ function MainPage() {
     }
   }, [accessToken, navigate]);
 
-  useEffect(() => { // TODO remove this part
+  useEffect(() => {
+    // TODO remove this part
     if (!userError) return;
 
     const isAuthError =

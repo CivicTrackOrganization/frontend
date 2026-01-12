@@ -37,6 +37,11 @@ export interface Comment {
   createdBy: string;
 }
 
+export interface CommentCreationRequest {
+  report: number;
+  content: string;
+}
+
 export interface ReportDetailed extends Report {
   comments: Array<Comment>;
 }

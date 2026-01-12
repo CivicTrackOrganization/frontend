@@ -1,8 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
 import { PiChatCircle } from "react-icons/pi";
-import { createVote, deleteVote, patchVote } from "../services/voteService";
+import { useReportVotes } from "../hooks/useReportVotes";
 import type { Report } from "../types";
 
 interface ReportItemProps {
@@ -11,90 +9,7 @@ interface ReportItemProps {
 }
 
 function ReportItem({ report, onClick }: ReportItemProps) {
-  const queryClient = useQueryClient();
-
-  const createVoteMutation = useMutation({
-    mutationFn: ({ reportId, vote }: { reportId: number; vote: number }) =>
-      createVote(reportId, vote),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
-    },
-    onError: () => {
-      toast.error("Failed to create vote");
-    },
-  });
-
-  const deleteVoteMutation = useMutation({
-    mutationFn: ({ reportId }: { reportId: number }) => deleteVote(reportId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
-    },
-    onError: () => {
-      toast.error("Failed to remove vote");
-    },
-  });
-
-  const patchVoteMutation = useMutation({
-    mutationFn: ({ reportId, vote }: { reportId: number; vote: number }) =>
-      patchVote(reportId, vote),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
-    },
-    onError: () => {
-      toast.error("Failed to create vote");
-    },
-  });
-
-  const isAnyMutationPending =
-    createVoteMutation.isPending ||
-    deleteVoteMutation.isPending ||
-    patchVoteMutation.isPending;
-
-  const upvote = () => {
-    if (isAnyMutationPending) return;
-
-    const request = {
-      reportId: report.id,
-      vote: 1,
-    };
-
-    createVoteMutation.mutate(request);
-  };
-
-  const downvote = () => {
-    if (isAnyMutationPending) return;
-
-    const request = {
-      reportId: report.id,
-      vote: -1,
-    };
-
-    createVoteMutation.mutate(request);
-  };
-
-  const removeVote = () => {
-    if (isAnyMutationPending) return;
-
-    deleteVoteMutation.mutate({ reportId: report.id });
-  };
-
-  const updateVote = (vote: number) => {
-    if (isAnyMutationPending) return;
-
-    patchVoteMutation.mutate({ reportId: report.id, vote });
-  };
-
-  const handleThumbsUp = () => {
-    if (report.userVoteType === 1) removeVote();
-    else if (report.userVoteType === -1) updateVote(1);
-    else upvote();
-  };
-
-  const handleThumbsDown = () => {
-    if (report.userVoteType === -1) removeVote();
-    else if (report.userVoteType === 1) updateVote(-1);
-    else downvote();
-  };
+  const { handleVoteAction, isPending } = useReportVotes(report.id);
 
   return (
     <div
@@ -129,20 +44,28 @@ function ReportItem({ report, onClick }: ReportItemProps) {
       </div>
       <div className="border-t border-t-gray-200 w-full mt-2 pt-2 flex justify-between items-center h-1/4">
         <div className="flex gap-5">
-          <div
+          <button
             className="flex items-center gap-1 text-green-800 cursor-pointer hover:bg-green-50 transition-colors px-2 py-1 rounded-md"
-            onClick={handleThumbsUp}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleVoteAction(report.userVoteType, 1);
+            }}
+            disabled={isPending}
           >
             <FaRegThumbsUp />
             <span className="text-sm">{report.votesFor}</span>
-          </div>
-          <div
+          </button>
+          <button
             className="flex items-center gap-1 text-red-600 cursor-pointer hover:bg-red-50 transition-colors px-2 py-1 rounded-md"
-            onClick={handleThumbsDown}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleVoteAction(report.userVoteType, -1);
+            }}
+            disabled={isPending}
           >
             <FaRegThumbsDown />
             <span className="text-sm">{report.votesAgainst}</span>
-          </div>
+          </button>
         </div>
         <div className="bg-blue-50 py-1 px-2 rounded-md flex items-center gap-2 hover:bg-blue-100 transition-colors cursor-pointer">
           <PiChatCircle />
