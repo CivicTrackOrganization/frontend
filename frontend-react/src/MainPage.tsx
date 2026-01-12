@@ -68,7 +68,7 @@ function MainPage() {
   useEffect(() => {
     if (!userError) return;
     toast.error("Failed to load user data. Please refresh the page.");
-  }, [userError, navigate]);
+  }, [userError]);
 
   if (isLoadingUser || !user || !userInfo) {
     return (

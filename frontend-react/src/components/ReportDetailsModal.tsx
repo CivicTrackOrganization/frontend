@@ -66,7 +66,7 @@ const ReportDetails = ({ reportId, userId, onClose }: ReportDetailsProps) => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  });
+  }, []);
 
   return (
     <div
@@ -109,6 +109,7 @@ const ReportDetails = ({ reportId, userId, onClose }: ReportDetailsProps) => {
                   <img
                     className="w-full h-full object-cover mb-2"
                     src={report.image}
+                    alt={report.title || "Report image"}
                   />
                 )}
                 <span className="text-lg text-gray-600">

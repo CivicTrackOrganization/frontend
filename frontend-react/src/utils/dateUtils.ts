@@ -1,7 +1,8 @@
-import { format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 export const displayIsoString = (isoString: string) => {
   const date = parseISO(isoString);
+  if (!isValid(date)) return "-";
   return format(date, "d MMMM yyyy HH:mm");
 };
 

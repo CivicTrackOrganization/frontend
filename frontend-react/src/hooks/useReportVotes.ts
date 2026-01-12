@@ -26,7 +26,7 @@ export const useReportVotes = (reportId: number) => {
   const patchVoteMutation = useMutation({
     mutationFn: ({ vote }: { vote: number }) => patchVote(reportId, vote),
     onSuccess: invalidate,
-    onError: () => toast.error("Failed to create vote"),
+    onError: () => toast.error("Failed to update vote"),
   });
 
   const isPending =

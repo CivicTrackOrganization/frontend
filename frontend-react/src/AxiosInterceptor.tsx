@@ -49,6 +49,7 @@ const AxiosInterceptor = ({ children }: AxiosInterceptorProps) => {
 
           if (originalRequest.url?.includes("/auth/refresh/")) {
             isRefreshing = false;
+            processQueue(error, null);
             handleLogoutCleanup();
             return Promise.reject(error);
           }
@@ -96,7 +97,11 @@ const AxiosInterceptor = ({ children }: AxiosInterceptorProps) => {
       }
     );
 
-    return () => privateApi.interceptors.response.eject(responseInterceptor);
+    return () => {
+      isRefreshing = false;
+      failedQueue = [];
+      privateApi.interceptors.response.eject(responseInterceptor);
+    };
   }, [navigate]);
 
   return children;

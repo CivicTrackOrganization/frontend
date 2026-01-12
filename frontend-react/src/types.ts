@@ -16,9 +16,9 @@ export interface Report {
   description: string;
   votesFor: number;
   votesAgainst: number;
-  userVoteType: number;
+  userVoteType: number | null;
   commentCount: number;
-  image: string;
+  image: string | null;
   location: string;
   priority: PriorityType;
   status: StatusType;

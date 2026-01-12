@@ -31,6 +31,7 @@ const CommentSection = ({
       <div className="flex flex-col gap-4">
         {officialComments.map((officialComment) => (
           <CommentBubble
+            key={officialComment.id}
             comment={officialComment}
             isOfficialResponse={true}
             isMine={officialComment.authorId === userId}
@@ -39,6 +40,7 @@ const CommentSection = ({
 
         {communityComments.map((communityComment) => (
           <CommentBubble
+            key={communityComment.id}
             comment={communityComment}
             isOfficialResponse={false}
             isMine={communityComment.authorId === userId}

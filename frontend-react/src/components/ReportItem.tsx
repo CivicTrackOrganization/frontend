@@ -3,6 +3,7 @@ import { PiChatCircle } from "react-icons/pi";
 import { useReportVotes } from "../hooks/useReportVotes";
 import type { Report } from "../types";
 import clsx from "clsx";
+import { displayDate } from "../utils/dateUtils";
 
 interface ReportItemProps {
   report: Report;
@@ -31,7 +32,7 @@ function ReportItem({ report, onClick }: ReportItemProps) {
           <p className="text-sm text-gray-600">{report.description}</p>
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
             <span>{report.location}</span>
-            <span>{report.createdAt}</span>
+            <span>{displayDate(report.createdAt)}</span>
           </div>
         </div>
         <div className="flex flex-col justify-between items-end gap-2 h-full">

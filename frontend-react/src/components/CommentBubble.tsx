@@ -59,7 +59,7 @@ const CommentBubble = ({
                 {isMine ? "You" : comment.createdBy}
               </span>
               <span className="bg-black px-2 py-1 hidden sm:block sm:px-2 text-white rounded-lg text-xs ms-2">
-                Offical response
+                Official response
               </span>
             </div>
           ) : (
