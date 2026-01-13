@@ -169,11 +169,11 @@ function RegisterLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-blue-100">
-      <div className="bg-white px-5 py-7 rounded-xl max-w-sm w-full m-3">
+    <div className="flex items-center justify-center min-h-screen bg-blue-100">
+      <div className="w-full max-w-sm px-5 m-3 bg-white py-7 rounded-xl">
         <div className="mb-6">
-          <p className="text-center font-extrabold text-xl">CivicTrack</p>
-          <p className="text-center text-gray-500 text-sm">
+          <p className="text-xl font-extrabold text-center">CivicTrack</p>
+          <p className="text-sm text-center text-gray-500">
             Resident problem reporting system
           </p>
         </div>
@@ -226,7 +226,7 @@ function RegisterLoginPage() {
           )}
           <button
             type="submit"
-            className="w-full py-2 bg-black text-white rounded-xl mt-4 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+            className="w-full py-2 mt-4 font-semibold text-white transition-colors bg-black cursor-pointer rounded-xl hover:bg-gray-800"
             disabled={signUpMutation.isPending || signInMutation.isPending}
           >
             {isRegister ? "Register" : "Login"}
