@@ -78,10 +78,8 @@ function NewReport() {
         setImage(null);
       }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Failed to submit report", error);
-      console.error("Error response data:", error.response?.data);
-      console.error("Form data being sent:", form);
       toast.error("Failed to submit report. Please try again.");
     },
   });

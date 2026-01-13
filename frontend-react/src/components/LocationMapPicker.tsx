@@ -52,81 +52,80 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
     }
   };
 
-  // Request user's current location on mount
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapCenter({ lat: latitude, lng: longitude });
-          setSelectedCoords({ lat: latitude, lng: longitude });
-          
-          // Get address from coordinates
-          const address = await reverseGeocode(longitude, latitude);
-          onLocationSelect(latitude, longitude, address);
-          
-          // Update map if it's already initialized
-          if (mapRef.current) {
-            mapRef.current.flyTo({
-              center: [longitude, latitude],
-              zoom: 13,
-              duration: 500,
-            });
-            if (markerRef.current) {
-              markerRef.current.setLngLat([longitude, latitude]);
-            }
-          }
-        },
-        (error) => {
-          console.log("Geolocation error:", error.message);
-          // Silently fallback to default location
-        }
-      );
-    }
-  }, []);
+  const onLocationSelectRef = useRef(onLocationSelect);
 
-  useEffect(() => {
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-    if (mapRef.current) return;
+useEffect(() => {
+  onLocationSelectRef.current = onLocationSelect;
+}, [onLocationSelect]); // keep the ref updated if the parent callback changes
 
-    if (mapContainerRef.current) {
-      mapRef.current = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [mapCenter.lng, mapCenter.lat],
-        zoom: 13,
-      });
+useEffect(() => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setMapCenter({ lat: latitude, lng: longitude });
+        setSelectedCoords({ lat: latitude, lng: longitude });
 
-      // Add initial marker
-      markerRef.current = new mapboxgl.Marker()
-        .setLngLat([mapCenter.lng, mapCenter.lat])
-        .addTo(mapRef.current);
-
-      // Change cursor to pointer
-      mapRef.current.getCanvas().style.cursor = "pointer";
-
-      // Handle map clicks for location selection
-      const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
-        const { lng, lat } = e.lngLat;
-        setSelectedCoords({ lat, lng });
-        if (markerRef.current) {
-          markerRef.current.setLngLat([lng, lat]);
-        }
         // Get address from coordinates
-        const address = await reverseGeocode(lng, lat);
-        onLocationSelect(lat, lng, address);
-      };
+        const address = await reverseGeocode(longitude, latitude);
+        onLocationSelectRef.current(latitude, longitude, address); // use ref
 
-      mapRef.current.on("click", handleMapClick);
-    }
-
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+        // Update map if it's already initialized
+        if (mapRef.current) {
+          mapRef.current.flyTo({
+            center: [longitude, latitude],
+            zoom: 13,
+            duration: 500,
+          });
+          if (markerRef.current) {
+            markerRef.current.setLngLat([longitude, latitude]);
+          }
+        }
+      },
+      (error) => {
+        console.log("Geolocation error:", error.message);
+        // Silently fallback to default location
       }
+    );
+  }
+}, []); // still mount-only
+
+useEffect(() => {
+  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+  if (mapRef.current) return; // already initialized
+
+  if (mapContainerRef.current) {
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: [mapCenter.lng, mapCenter.lat], // initial default
+      zoom: 13,
+    });
+
+    // Initial marker
+    markerRef.current = new mapboxgl.Marker()
+      .setLngLat([mapCenter.lng, mapCenter.lat])
+      .addTo(mapRef.current);
+
+    mapRef.current.getCanvas().style.cursor = "pointer";
+
+    const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
+      const { lng, lat } = e.lngLat;
+      setSelectedCoords({ lat, lng });
+      markerRef.current?.setLngLat([lng, lat]);
+      const address = await reverseGeocode(lng, lat);
+      onLocationSelect(lat, lng, address);
     };
-  }, []);
+
+    mapRef.current.on("click", handleMapClick);
+  }
+
+  return () => {
+    mapRef.current?.remove();
+    mapRef.current = null;
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []); 
 
   const handleCenterMap = () => {
     if (mapRef.current) {
