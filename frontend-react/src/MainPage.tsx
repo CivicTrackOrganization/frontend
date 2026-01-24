@@ -51,7 +51,7 @@ function MainPage() {
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
         reputation: 10,
-        role: "user",
+        role: "moderator",
       }
     : null;
 
@@ -83,42 +83,76 @@ function MainPage() {
         role={user.role}
       />
       <main className="p-6 mx-auto space-y-6 max-w-7xl">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {(() => {
-            return (
-              <>
-                <StatsCard title="Your reputation" value={user.reputation} />
-                {!isLoadingMy && !isErrorMy && myReports && (
-                  <StatsCard title="Your reports" value={myReports.length} />
-                )}
-                {!isLoadingAll && !isErrorAll && allReports && (
-                  <StatsCard
-                    title="Active reports"
-                    value={
-                      allReports.length -
-                      calculateResolvedReportsCount(allReports)
-                    }
-                  />
-                )}
-              </>
-            );
-          })()}
-        </div>
-
-        <div className="flex items-center justify-between p-6 text-white shadow-lg rounded-xl bg-linear-to-r from-indigo-600 to-purple-600">
-          <div>
-            <h2 className="text-2xl font-semibold">Report a new problem</h2>
-            <p className="text-sm opacity-90">
-              Help improve the city — report a problem in your area
-            </p>
+        {user.role === "user" ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <StatsCard title="Your reputation" value={user.reputation} />
+            {!isLoadingMy && !isErrorMy && myReports && (
+              <StatsCard title="Your reports" value={myReports.length} />
+            )}
+            {!isLoadingAll && !isErrorAll && allReports && (
+              <StatsCard
+                title="Active reports"
+                value={
+                  allReports.length - calculateResolvedReportsCount(allReports)
+                }
+              />
+            )}
           </div>
-          <button
-            onClick={() => setShowNewReport(true)}
-            className="px-4 py-2 text-indigo-700 bg-white rounded-lg shadow cursor-pointer hover:opacity-95"
-          >
-            New Report
-          </button>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-blue-700">New</p>
+              <p className="text-3xl font-bold text-blue-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "new").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-yellow-700 ">
+                In Progress
+              </p>
+              <p className="text-3xl font-bold text-yellow-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "in_progress").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-green-50 border border-green-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-green-700">Resolved</p>
+              <p className="text-3xl font-bold text-green-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "resolved").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-red-700 ">Rejected</p>
+              <p className="text-3xl font-bold text-red-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "rejected").length
+                  : "-"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {user.role === "user" && (
+          <div className="flex items-center justify-between p-6 text-white shadow-lg rounded-xl bg-linear-to-r from-indigo-600 to-purple-600">
+            <div>
+              <h2 className="text-2xl font-semibold">Report a new problem</h2>
+              <p className="text-sm opacity-90">
+                Help improve the city — report a problem in your area
+              </p>
+            </div>
+            <button
+              onClick={() => setShowNewReport(true)}
+              className="px-4 py-2 text-indigo-700 bg-white rounded-lg shadow cursor-pointer hover:opacity-95"
+            >
+              New Report
+            </button>
+          </div>
+        )}
         {showNewReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
@@ -155,34 +189,36 @@ function MainPage() {
         <div className="space-y-6">
           <MapSection />
 
-          <div className="p-3 bg-white shadow-sm rounded-xl">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setView("all")}
-                    className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
-                      view === "all"
-                        ? "text-white bg-blue-600"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setView("mine")}
-                    className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
-                      view === "mine"
-                        ? "text-white bg-blue-600"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    My reports
-                  </button>
+          {user.role !== "moderator" && (
+            <div className="p-3 bg-white shadow-sm rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setView("all")}
+                      className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
+                        view === "all"
+                          ? "text-white bg-blue-600"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setView("mine")}
+                      className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
+                        view === "mine"
+                          ? "text-white bg-blue-600"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      My reports
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div>
             {!currentReports ? (
@@ -204,6 +240,7 @@ function MainPage() {
           reportId={selectedReportId}
           onClose={() => setSelectedReportId(null)}
           userId={userInfo.id}
+          isUserModerator={user.role === "moderator"}
         />
       )}
     </div>

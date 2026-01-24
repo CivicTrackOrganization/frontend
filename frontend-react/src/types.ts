@@ -28,6 +28,13 @@ export interface Report {
   createdAt: string;
 }
 
+export interface ReportStatus {
+  statusName: StatusType;
+  moderatorComment: string;
+  modifiedBy: string;
+  modifiedAt: string;
+}
+
 export interface Comment {
   id: number;
   report: number;

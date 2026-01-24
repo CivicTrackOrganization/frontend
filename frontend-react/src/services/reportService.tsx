@@ -1,5 +1,10 @@
 import { privateApi } from "../clients";
-import type { CreateReportRequest, Report, ReportDetailed } from "../types";
+import type {
+  CreateReportRequest,
+  Report,
+  ReportDetailed,
+  ReportStatus,
+} from "../types";
 
 export const getReport = async (reportId: number): Promise<ReportDetailed> => {
   const res = await privateApi.get(`/reports/${reportId}/`);
@@ -8,7 +13,7 @@ export const getReport = async (reportId: number): Promise<ReportDetailed> => {
 
 export const createReport = async (
   report: CreateReportRequest,
-  image: File | null
+  image: File | null,
 ): Promise<Report> => {
   const formData = new FormData();
 
@@ -36,4 +41,24 @@ export const getReports = async (): Promise<Report[]> => {
 export const getMyReports = async (): Promise<Report[]> => {
   const res = await privateApi.get<Report[]>("/reports/me/");
   return res.data;
+};
+
+export const getReportStatusHistory = async (): Promise<
+  Array<ReportStatus>
+> => {
+  const response: Array<ReportStatus> = [
+    {
+      statusName: "new",
+      moderatorComment: "",
+      modifiedBy: "",
+      modifiedAt: "2026-01-23",
+    },
+    {
+      statusName: "in_progress",
+      moderatorComment: "Report approved",
+      modifiedBy: "John Smith",
+      modifiedAt: "2026-01-24",
+    },
+  ];
+  return response;
 };
