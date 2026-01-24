@@ -17,7 +17,6 @@ const MapSection: React.FC = () => {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
-  // Poprawna kolejność [lng, lat] dla Mapbox
   const defaultCoords: [number, number] = [19.906864041831486, 50.03011538986579];
 
   const [reports, setReports] = useState<Report[]>([]);
@@ -25,7 +24,6 @@ const MapSection: React.FC = () => {
   const [radius, setRadius] = useState<number>(500);
   const [mapCentered, setMapCentered] = useState(false);
 
-  // Pobieranie raportów
   const fetchReports = useCallback(async () => {
     try {
       const data = await getReports();
@@ -35,7 +33,6 @@ const MapSection: React.FC = () => {
     }
   }, []);
 
-  // Inicjalizacja mapy i domyślnego markera
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -47,7 +44,6 @@ const MapSection: React.FC = () => {
       zoom: 10
     });
 
-    // Fioletowy marker dla domyślnej pozycji
     const marker = new mapboxgl.Marker({ color: "purple" })
       .setLngLat(defaultCoords)
       .setPopup(new mapboxgl.Popup().setText("You are here"))
@@ -61,20 +57,18 @@ const MapSection: React.FC = () => {
     };
   }, []);
 
-  // Polling raportów
   useEffect(() => {
     fetchReports();
     const interval = setInterval(fetchReports, 3000);
     return () => clearInterval(interval);
   }, [fetchReports]);
 
-  // Geolokalizacja użytkownika
   useEffect(() => {
     if (!navigator.geolocation) return;
 
     const watch = navigator.geolocation.watchPosition(
       (pos) => {
-        const newPos: [number, number] = [pos.coords.longitude, pos.coords.latitude]; // <-- poprawione
+        const newPos: [number, number] = [pos.coords.longitude, pos.coords.latitude];
         setUserPosition(newPos);
 
         if (mapRef.current && userMarkerRef.current) {
@@ -92,7 +86,6 @@ const MapSection: React.FC = () => {
     return () => navigator.geolocation.clearWatch(watch);
   }, [mapCentered]);
 
-  // Funkcja licząca odległość w metrach
   const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
     const R = 6371000;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -106,7 +99,6 @@ const MapSection: React.FC = () => {
     return R * c;
   };
 
-  // Rysowanie markerów raportów
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -117,7 +109,7 @@ const MapSection: React.FC = () => {
       .filter((r) => r.latitude && r.longitude)
       .filter((r) => {
         const distance = getDistance(
-          userPosition[0], userPosition[1], // lng, lat
+          userPosition[0], userPosition[1],
           r.longitude!, r.latitude!
         );
         return distance <= radius;
@@ -147,7 +139,7 @@ const MapSection: React.FC = () => {
         <input
           type="range"
           min={100}
-          max={2000}
+          max={5000}
           step={50}
           value={radius}
           onChange={(e) => setRadius(Number(e.target.value))}

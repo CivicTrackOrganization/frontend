@@ -34,7 +34,6 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   }>>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Function to reverse geocode coordinates to address using Nominatim
   const reverseGeocode = async (lng: number, lat: number): Promise<string> => {
     try {
       const response = await fetch(
@@ -56,7 +55,7 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
 
 useEffect(() => {
   onLocationSelectRef.current = onLocationSelect;
-}, [onLocationSelect]); // keep the ref updated if the parent callback changes
+}, [onLocationSelect]);
 
 useEffect(() => {
   if (navigator.geolocation) {
@@ -66,11 +65,9 @@ useEffect(() => {
         setMapCenter({ lat: latitude, lng: longitude });
         setSelectedCoords({ lat: latitude, lng: longitude });
 
-        // Get address from coordinates
         const address = await reverseGeocode(longitude, latitude);
-        onLocationSelectRef.current(latitude, longitude, address); // use ref
+        onLocationSelectRef.current(latitude, longitude, address);
 
-        // Update map if it's already initialized
         if (mapRef.current) {
           mapRef.current.flyTo({
             center: [longitude, latitude],
@@ -84,26 +81,24 @@ useEffect(() => {
       },
       (error) => {
         console.log("Geolocation error:", error.message);
-        // Silently fallback to default location
       }
     );
   }
-}, []); // still mount-only
+}, []);
 
 useEffect(() => {
   mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-  if (mapRef.current) return; // already initialized
+  if (mapRef.current) return;
 
   if (mapContainerRef.current) {
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [mapCenter.lng, mapCenter.lat], // initial default
+      center: [mapCenter.lng, mapCenter.lat],
       zoom: 13,
     });
 
-    // Initial marker
-    markerRef.current = new mapboxgl.Marker()
+    markerRef.current = new mapboxgl.Marker({ color: "purple" })
       .setLngLat([mapCenter.lng, mapCenter.lat])
       .addTo(mapRef.current);
 
@@ -145,7 +140,6 @@ useEffect(() => {
           setMapCenter({ lat: latitude, lng: longitude });
           setSelectedCoords({ lat: latitude, lng: longitude });
           
-          // Get address from coordinates
           const address = await reverseGeocode(longitude, latitude);
           onLocationSelect(latitude, longitude, address);
           
@@ -161,7 +155,6 @@ useEffect(() => {
           }
         },
         (error) => {
-          console.log("Geolocation error:", error.message);
           alert("Unable to access your location. Please check your browser permissions.");
         }
       );
@@ -199,7 +192,6 @@ useEffect(() => {
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     
-    // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
@@ -209,7 +201,6 @@ useEffect(() => {
       return;
     }
 
-    // Set new timeout for debounced search
     searchTimeoutRef.current = setTimeout(() => {
       handleSearchAddress(query);
     }, 500);
