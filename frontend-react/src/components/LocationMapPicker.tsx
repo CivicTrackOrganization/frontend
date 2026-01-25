@@ -8,6 +8,21 @@ interface LocationMapPickerProps {
   initialLng?: number;
 }
 
+interface NominatimFeature {
+  place_id: string;
+  name?: string;
+  display_name: string;
+  lon: string;
+  lat: string;
+}
+
+interface SearchResult {
+  id: string;
+  name?: string;
+  place_name: string;
+  center: [number, number];
+}
+
 const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   onLocationSelect,
   initialLat = 50.03011538986579,
@@ -21,18 +36,10 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
     lat: number;
     lng: number;
   }>({ lat: initialLat, lng: initialLng });
-  const [mapCenter, setMapCenter] = useState<{
-    lat: number;
-    lng: number;
-  }>({ lat: initialLat, lng: initialLng });
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Array<{
-    id: string;
-    name: string;
-    place_name: string;
-    center: [number, number];
-  }>>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
 
   const reverseGeocode = async (lng: number, lat: number): Promise<string> => {
     try {
@@ -62,7 +69,6 @@ useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        setMapCenter({ lat: latitude, lng: longitude });
         setSelectedCoords({ lat: latitude, lng: longitude });
 
         const address = await reverseGeocode(longitude, latitude);
@@ -94,12 +100,12 @@ useEffect(() => {
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [mapCenter.lng, mapCenter.lat],
+      center: [initialLng, initialLat],
       zoom: 13,
     });
 
     markerRef.current = new mapboxgl.Marker({ color: "purple" })
-      .setLngLat([mapCenter.lng, mapCenter.lat])
+      .setLngLat([initialLng, initialLat])
       .addTo(mapRef.current);
 
     mapRef.current.getCanvas().style.cursor = "pointer";
@@ -137,7 +143,6 @@ useEffect(() => {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          setMapCenter({ lat: latitude, lng: longitude });
           setSelectedCoords({ lat: latitude, lng: longitude });
           
           const address = await reverseGeocode(longitude, latitude);
@@ -154,7 +159,7 @@ useEffect(() => {
             }
           }
         },
-        (error) => {
+        () => {
           alert("Unable to access your location. Please check your browser permissions.");
         }
       );
@@ -175,7 +180,7 @@ useEffect(() => {
       const data = await response.json();
       
       if (Array.isArray(data)) {
-        setSearchResults(data.map((feature: any) => ({
+        setSearchResults(data.map((feature: NominatimFeature): SearchResult => ({
           id: feature.place_id,
           name: feature.name,
           place_name: feature.display_name,

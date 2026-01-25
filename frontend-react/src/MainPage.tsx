@@ -47,10 +47,24 @@ function MainPage() {
     retry: false,
   });
 
+  const calculateReputation = (reports: Report[] | undefined) => {
+   if (!reports) return 0;
+
+   const totalReports = reports.length;
+   const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
+   const totalAgainst = reports.reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
+
+   const reputation = (totalReports + totalFor - totalAgainst) * 10;
+
+   return Math.max(0, reputation);
+  };
+
+  const userReputation = calculateReputation(myReports);
+
   const user: User | null = userInfo
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
-        reputation: 10,
+        reputation: userReputation,
         role: "user",
       }
     : null;

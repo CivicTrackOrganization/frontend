@@ -11,13 +11,13 @@ const typeColorMap: Record<ReportType, string> = {
   other: "#8e8e8e"
 };
 
+const defaultCoords: [number, number] = [19.906864041831486, 50.03011538986579];
+
 const MapSection: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
-
-  const defaultCoords: [number, number] = [19.906864041831486, 50.03011538986579];
 
   const [reports, setReports] = useState<Report[]>([]);
   const [userPosition, setUserPosition] = useState<[number, number]>(defaultCoords);
@@ -58,10 +58,16 @@ const MapSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
+  const id = setTimeout(() => {
     fetchReports();
-    const interval = setInterval(fetchReports, 3000);
-    return () => clearInterval(interval);
-  }, [fetchReports]);
+  }, 0);
+
+  const interval = setInterval(fetchReports, 3000);
+  return () => {
+    clearTimeout(id);
+    clearInterval(interval);
+  };
+}, [fetchReports]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;

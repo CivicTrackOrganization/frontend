@@ -1,5 +1,6 @@
 import { privateApi } from "../clients";
 import type { CreateReportRequest, Report, ReportDetailed } from "../types";
+import type { AxiosError } from "axios";
 
 export const getReport = async (reportId: number): Promise<ReportDetailed> => {
   const res = await privateApi.get(`/reports/${reportId}/`);
@@ -13,7 +14,6 @@ export const createReport = async (
   const formData = new FormData();
 
   Object.entries(report).forEach(([key, value]) => {
-    // Skip latitude and longitude, we'll send them as coordinates
     if (key === "latitude" || key === "longitude") {
       return;
     }
@@ -23,7 +23,6 @@ export const createReport = async (
     }
   });
 
-  // Send coordinates as individual array elements if both are present
   if (report.latitude !== undefined && report.longitude !== undefined) {
     formData.append("coordinates[0]", String(report.longitude));
     formData.append("coordinates[1]", String(report.latitude));
@@ -40,8 +39,9 @@ export const createReport = async (
       },
     });
     return res.data;
-  } catch (error: any) {
-    console.error("Backend error response:", error.response?.data);
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+    console.error("Backend error response:", axiosError.response?.data);
     throw error;
   }
 };
