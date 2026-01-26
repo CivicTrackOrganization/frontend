@@ -61,9 +61,9 @@ export const getMyReports = async (): Promise<Report[]> => {
   return res.data;
 };
 
-export const getReportStatusHistory = async (): Promise<
-  Array<ReportStatus>
-> => {
+export const getReportStatusHistory = async (
+  reportId: number,
+): Promise<Array<ReportStatus>> => {
   const response: Array<ReportStatus> = [
     {
       statusName: "new",
@@ -78,5 +78,6 @@ export const getReportStatusHistory = async (): Promise<
       modifiedAt: "2026-01-24",
     },
   ];
+  console.log("fetching report status history for report", reportId);
   return response;
 };

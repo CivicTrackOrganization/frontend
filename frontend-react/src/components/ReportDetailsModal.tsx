@@ -105,7 +105,7 @@ const ReportDetails = ({
                 className="cursor-pointer hover:text-gray-500 transition-colors"
               />
             </header>
-            <div className="h-11/12 overflow-scroll scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent hover:scrollbar-thumb-gray-200 transition-colors duration-300">
+            <div className="h-11/12 overflow-scroll modal-scroll transition-colors duration-300">
               <div className="flex gap-2 text-xs capitalize">
                 <span className="px-2 py-1 bg-gray-100 text-gray-800 font-semibold rounded-xl">
                   {report.type}
@@ -219,7 +219,7 @@ const ReportDetails = ({
                               <div className="flex items-center gap-2 mb-1">
                                 <span
                                   className={clsx(
-                                    "px-2 py-0.5 text-xs font-semibold rounded borde",
+                                    "px-2 py-0.5 text-xs font-semibold rounded border",
                                     {
                                       "bg-blue-100 text-blue-800 border-blue-200":
                                         reportStatus.statusName === "new",

@@ -81,20 +81,20 @@ const ModeratorReportManagementSection = ({
 
   const handleStatusOptionChangedEvent = () => {
     if (!statusOption) toast.error("Please select a status before modifying");
-    if (changeStatusMutation.isPending) return;
+    if (!statusOption || changeStatusMutation.isPending) return;
     changeStatusMutation.mutate();
   };
 
   const handleAssignedUnitEvent = () => {
     if (!assignedUnit) toast.error("Please select a unit before assigning");
-    if (assignReportUnitMutation.isPending) return;
+    if (!assignedUnit || assignReportUnitMutation.isPending) return;
     assignReportUnitMutation.mutate();
   };
 
   const handleOfficialResponsePublishment = () => {
     if (!officialResponseContent.trim())
       toast.error("Official response content cannot be empty");
-    if (sendOfficialResponse.isPending) return;
+    if (!officialResponseContent || sendOfficialResponse.isPending) return;
     sendOfficialResponse.mutate();
   };
 
