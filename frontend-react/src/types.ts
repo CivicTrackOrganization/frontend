@@ -26,6 +26,8 @@ export interface Report {
   type: ReportType;
   assignedUnit: AssignedUnit;
   createdAt: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface ReportStatus {
@@ -73,4 +75,6 @@ export interface CreateReportRequest {
   location: string;
   priority: PriorityType;
   type: ReportType;
+  latitude?: number;
+  longitude?: number;
 }
