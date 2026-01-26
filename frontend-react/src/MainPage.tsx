@@ -51,7 +51,7 @@ function MainPage() {
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
         reputation: 10,
-        role: "moderator",
+        role: "user",
       }
     : null;
 

@@ -4,22 +4,23 @@ export const modifyReportStatus = async (
   reportId: number,
   newStatus: StatusType,
 ) => {
-  const response = await new Promise(() => {});
-  return response;
+  throw new Error(
+    `modifyReportStatus not implemented for report ${reportId} (${newStatus})`,
+  );
 };
-
 export const assignReportUnit = async (
   reportId: number,
   assignedUnit: AssignedUnit,
 ) => {
-  const response = await new Promise(() => {});
-  return response;
+  throw new Error(
+    `assignReportUnit not implemented for report ${reportId} (${assignedUnit})`,
+  );
 };
-
 export const publishOfficialResponse = async (
   reportId: number,
   responseContent: string,
 ) => {
-  const response = await new Promise(() => {});
-  return response;
+  throw new Error(
+    `publishOfficialResponse not implemented for report ${reportId}: ${responseContent}`,
+  );
 };
