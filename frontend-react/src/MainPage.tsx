@@ -47,10 +47,24 @@ function MainPage() {
     retry: false,
   });
 
+  const calculateReputation = (reports: Report[] | undefined) => {
+   if (!reports) return 0;
+
+   const totalReports = reports.length;
+   const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
+   const totalAgainst = reports.reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
+
+   const reputation = (totalReports + totalFor - totalAgainst) * 10;
+
+   return Math.max(0, reputation);
+  };
+
+  const userReputation = calculateReputation(myReports);
+
   const user: User | null = userInfo
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
-        reputation: 10,
+        reputation: userReputation,
         role: "user",
       }
     : null;
@@ -69,7 +83,7 @@ function MainPage() {
 
   if (isLoadingUser || !user || !userInfo) {
     return (
-      <div className="min-h-screen w-full bg-linear-to-b from-gray-50 to-white flex justify-center items-center text-3xl">
+      <div className="flex items-center justify-center w-full min-h-screen text-3xl bg-linear-to-b from-gray-50 to-white">
         Loading user data...
       </div>
     );
@@ -125,7 +139,13 @@ function MainPage() {
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowNewReport(false)}
             />
-            <div className="relative w-full max-w-2xl mx-4">
+            <div 
+              className="relative w-11/12 max-w-5xl max-h-[90vh] overflow-y-auto mx-4 modal-scroll"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
               <div className="relative p-6 bg-white rounded-lg shadow-lg">
                 <button
                   onClick={() => setShowNewReport(false)}

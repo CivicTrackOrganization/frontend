@@ -1,5 +1,6 @@
 import { privateApi } from "../clients";
 import type { CreateReportRequest, Report, ReportDetailed } from "../types";
+import type { AxiosError } from "axios";
 
 export const getReport = async (reportId: number): Promise<ReportDetailed> => {
   const res = await privateApi.get(`/reports/${reportId}/`);
@@ -13,19 +14,36 @@ export const createReport = async (
   const formData = new FormData();
 
   Object.entries(report).forEach(([key, value]) => {
-    formData.append(key, value);
+    if (key === "latitude" || key === "longitude") {
+      return;
+    }
+    
+    if (value !== undefined) {
+      formData.append(key, String(value));
+    }
   });
+
+  if (report.latitude !== undefined && report.longitude !== undefined) {
+    formData.append("coordinates[0]", String(report.longitude));
+    formData.append("coordinates[1]", String(report.latitude));
+  }
 
   if (image) {
     formData.append("image", image);
   }
 
-  const res = await privateApi.post<Report>("/reports/", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
+  try {
+    const res = await privateApi.post<Report>("/reports/", formData, {
+      headers: {
+        "Content-Type": undefined,
+      },
+    });
+    return res.data;
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+    console.error("Backend error response:", axiosError.response?.data);
+    throw error;
+  }
 };
 
 export const getReports = async (): Promise<Report[]> => {

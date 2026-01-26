@@ -8,6 +8,7 @@ import type {
   ReportType,
 } from "../types";
 import { createReport } from "../services/reportService";
+import LocationMapPicker from "./LocationMapPicker";
 
 function NewReport() {
   type FormState = {
@@ -16,6 +17,8 @@ function NewReport() {
     location: string;
     priority: PriorityType;
     type: ReportType;
+    latitude?: number;
+    longitude?: number;
   };
 
   const initialForm: FormState = {
@@ -24,6 +27,8 @@ function NewReport() {
     location: "",
     priority: "normal",
     type: "other",
+    latitude: undefined,
+    longitude: undefined,
   };
 
   const [form, setForm] = useState<FormState>(initialForm);
@@ -35,6 +40,15 @@ function NewReport() {
   const MY_REPORTS_KEY = ["myReports"];
   const ALL_REPORTS_KEY = ["reports"];
 
+  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+    setForm((s) => ({
+      ...s,
+      latitude: lat,
+      longitude: lng,
+      location: address,
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (submitReportMutation.isPending) return;
@@ -45,6 +59,7 @@ function NewReport() {
 
     submitReportMutation.mutate({ payload: requestData, image: image });
   };
+
 
   const submitReportMutation = useMutation<
     Report,
@@ -90,13 +105,15 @@ function NewReport() {
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+        className="grid grid-cols-2 gap-8"
       >
-        <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Title
-          </label>
-          <div className="flex items-center gap-2">
+        {/* Left Column - Form Inputs */}
+        <div className="space-y-5">
+          {/* Title */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Title
+            </label>
             <input
               type="text"
               placeholder="Short report title"
@@ -108,137 +125,152 @@ function NewReport() {
               required
             />
           </div>
-        </div>
 
-        <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            placeholder="Details (what happened, when, additional info)"
-            value={form.description}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, description: e.target.value }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200 h-28"
-            maxLength={1000}
-            required
-          />
-          <div className="text-xs text-right text-gray-500">
-            {form.description.length}/1000
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <input
-            type="text"
-            placeholder="Address or description of location"
-            value={form.location}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, location: e.target.value }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Priority
-          </label>
-          <select
-            value={form.priority}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                priority: e.target.value as PriorityType,
-              }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="low">Low</option>
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Type
-          </label>
-          <select
-            value={form.type}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                type: e.target.value as ReportType,
-              }))
-            }
-            className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="infrastructure">Infrastructure</option>
-            <option value="safety">Safety</option>
-            <option value="environment">Environment</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div className="sm:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Attach photo (optional)
-          </label>
-          <div className="flex items-center gap-3">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files && e.target.files[0];
-                if (f) {
-                  if (preview) URL.revokeObjectURL(preview);
-                  setImage(f);
-                  setPreview(URL.createObjectURL(f));
-                } else {
-                  if (preview) URL.revokeObjectURL(preview);
-                  setImage(null);
-                  setPreview(null);
-                }
-              }}
-              className="p-1"
+          {/* Description */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              placeholder="Details (what happened, when, additional info)"
+              value={form.description}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, description: e.target.value }))
+              }
+              className="w-full h-20 p-2 border border-gray-200 rounded resize-none focus:ring-2 focus:ring-blue-200"
+              maxLength={1000}
+              required
             />
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="object-cover w-20 h-20 border rounded"
+            <div className="mt-1 text-xs text-right text-gray-500">
+              {form.description.length}/1000
+            </div>
+          </div>
+
+          {/* Location Input */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Address or Description
+            </label>
+            <input
+              type="text"
+              placeholder="Address or description of location"
+              value={form.location}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, location: e.target.value }))
+              }
+              className="w-full p-2 border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
+              required
+            />
+          </div>
+
+          {/* Type & Priority */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Type
+              </label>
+              <select
+                value={form.type}
+                onChange={(e) =>
+                  setForm((s) => ({
+                    ...s,
+                    type: e.target.value as ReportType,
+                  }))
+                }
+                className="w-full p-2 text-sm border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="infrastructure">Infrastructure</option>
+                <option value="safety">Safety</option>
+                <option value="environment">Environment</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Priority
+              </label>
+              <select
+                value={form.priority}
+                onChange={(e) =>
+                  setForm((s) => ({
+                    ...s,
+                    priority: e.target.value as PriorityType,
+                  }))
+                }
+                className="w-full p-2 text-sm border border-gray-200 rounded focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Photo (optional)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) {
+                    if (preview) URL.revokeObjectURL(preview);
+                    setImage(f);
+                    setPreview(URL.createObjectURL(f));
+                  } else {
+                    if (preview) URL.revokeObjectURL(preview);
+                    setImage(null);
+                    setPreview(null);
+                  }
+                }}
+                className="flex-1 p-2 text-sm border border-gray-200 rounded cursor-pointer"
               />
-            )}
+              {preview && (
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="object-cover w-16 h-16 border rounded shrink-0"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              className={`px-6 py-2 text-white font-medium rounded-lg transition ${
+                form.title &&
+                form.description &&
+                form.location &&
+                !submitReportMutation.isPending
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              disabled={
+                !form.title ||
+                !form.description ||
+                !form.location ||
+                submitReportMutation.isPending
+              }
+            >
+              {submitReportMutation.isPending ? "Submitting..." : "Add report"}
+            </button>
           </div>
         </div>
 
-        <div className="flex justify-end mt-2 sm:col-span-2">
-          <button
-            type="submit"
-            className={`px-4 py-2 text-white rounded ${
-              form.title &&
-              form.description &&
-              form.location &&
-              !submitReportMutation.isPending
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
-            disabled={
-              !form.title ||
-              !form.description ||
-              !form.location ||
-              submitReportMutation.isPending
-            }
-          >
-            Add report
-          </button>
+        {/* Right Column - Map */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Pinpoint Location
+          </label>
+          <LocationMapPicker onLocationSelect={handleLocationSelect} />
         </div>
       </form>
     </div>
