@@ -226,7 +226,7 @@ const ReportDetails = ({
                                       "bg-amber-100 text-amber-800 border-amber-200":
                                         reportStatus.statusName ===
                                         "in_progress",
-                                      "bg-red-100 text-red-800 border-red-800":
+                                      "bg-red-100 text-red-800 border-red-200":
                                         reportStatus.statusName === "rejected",
                                       "bg-green-100 text-green-800 border-green-200":
                                         reportStatus.statusName === "resolved",
@@ -246,7 +246,7 @@ const ReportDetails = ({
                               </p>
                             </div>
                             <span className="text-xs whitespace-nowrap">
-                              {reportStatus.modifiedAt}
+                              {displayDate(reportStatus.modifiedAt)}
                             </span>
                           </div>
                         </div>
