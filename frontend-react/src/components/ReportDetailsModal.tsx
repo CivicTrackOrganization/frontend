@@ -69,7 +69,7 @@ const ReportDetails = ({
   };
 
   const { data: reportStatusHistory } = useQuery({
-    queryFn: getReportStatusHistory,
+    queryFn: () => getReportStatusHistory(reportId),
     queryKey: ["reportStatusHistory", reportId],
   });
 
