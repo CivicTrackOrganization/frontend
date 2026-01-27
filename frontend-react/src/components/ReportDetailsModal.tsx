@@ -18,6 +18,7 @@ import type { CommentCreationRequest } from "../types";
 import { displayDate, displayIsoString } from "../utils/dateUtils";
 import CommentSection from "./CommentSection";
 import ModeratorReportManagementSection from "./ModeratorReportManagementSection";
+import { findReportStatusStyle } from "../utils/stylingUtils";
 
 interface ReportDetailsProps {
   reportId: number;
@@ -139,7 +140,7 @@ const ReportDetails = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <FaCalendar className="text-gray-400" />
-                    <span>{displayDate(report.createdAt)}</span>
+                    <span>{displayIsoString(report.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <FaMapMarkerAlt className="text-gray-400" />
@@ -191,67 +192,54 @@ const ReportDetails = ({
                   <h3 className="text-lg font-semibold text-text-main-light mb-6">
                     Status changes history
                   </h3>
-                  {[...reportStatusHistory]
-                    .reverse()
-                    .map((reportStatus, index) => (
-                      <div
-                        key={index}
-                        className="relative border-l-2 border-gray-200 ml-3 space-y-8 pb-4"
-                      >
-                        <div className="relative pl-8">
-                          <div
-                            className={clsx(
-                              "absolute -left-[9px] top-0 w-4 h-4 rounded-full ring-4 ring-white",
-                              {
-                                "bg-amber-300":
-                                  reportStatus.statusName === "in_progress",
-                                "bg-blue-300":
-                                  reportStatus.statusName === "new",
-                                "bg-red-300":
-                                  reportStatus.statusName === "rejected",
-                                "bg-green-300":
-                                  reportStatus.statusName === "resolved",
-                              },
-                            )}
-                          ></div>
-                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span
-                                  className={clsx(
-                                    "px-2 py-0.5 text-xs font-semibold rounded border",
-                                    {
-                                      "bg-blue-100 text-blue-800 border-blue-200":
-                                        reportStatus.statusName === "new",
-                                      "bg-amber-100 text-amber-800 border-amber-200":
-                                        reportStatus.statusName ===
-                                        "in_progress",
-                                      "bg-red-100 text-red-800 border-red-200":
-                                        reportStatus.statusName === "rejected",
-                                      "bg-green-100 text-green-800 border-green-200":
-                                        reportStatus.statusName === "resolved",
-                                    },
-                                  )}
-                                >
-                                  {reportStatus.statusName !== "in_progress"
-                                    ? reportStatus.statusName
-                                    : "in progress"}
-                                </span>
-                              </div>
-                              <p className="text-sm font-medium">
-                                {reportStatus.moderatorComment}
-                              </p>
-                              <p className="text-xs mt-1">
-                                by {reportStatus.modifiedBy}
-                              </p>
+                  {reportStatusHistory.map((reportStatus, index) => (
+                    <div
+                      key={index}
+                      className="relative border-l-2 border-gray-200 ml-3 space-y-8 pb-4"
+                    >
+                      <div className="relative pl-8">
+                        <div
+                          className={clsx(
+                            "absolute -left-[9px] top-0 w-4 h-4 rounded-full ring-4 ring-white",
+                            {
+                              "bg-amber-300":
+                                reportStatus.statusName === "in_progress",
+                              "bg-blue-300": reportStatus.statusName === "new",
+                              "bg-red-300":
+                                reportStatus.statusName === "rejected",
+                              "bg-green-300":
+                                reportStatus.statusName === "resolved",
+                            },
+                          )}
+                        ></div>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span
+                                className={clsx(
+                                  "px-2 py-0.5 text-xs font-semibold rounded border capitalize",
+                                  findReportStatusStyle(
+                                    reportStatus.statusName,
+                                  ),
+                                )}
+                              >
+                                {reportStatus.statusName.replaceAll("_", " ")}
+                              </span>
                             </div>
-                            <span className="text-xs whitespace-nowrap">
-                              {displayIsoString(reportStatus.createdAt)}
-                            </span>
+                            <p className="text-sm font-medium">
+                              {reportStatus.moderatorComment}
+                            </p>
+                            <p className="text-xs mt-1">
+                              by {reportStatus.modifiedBy}
+                            </p>
                           </div>
+                          <span className="text-xs whitespace-nowrap">
+                            {displayIsoString(reportStatus.createdAt)}
+                          </span>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  ))}
                 </div>
               )}
               <CommentSection

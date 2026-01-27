@@ -51,13 +51,15 @@ function MainPage() {
     if (!reports) return 0;
 
     const totalReports = reports.length;
-    const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
-    const totalAgainst = reports.reduce(
-      (acc, r) => acc + (r.votesAgainst ?? 0),
-      0,
-    );
+    const totalForResolved = reports
+      .filter((report) => report.status === "resolved")
+      .reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
+    const totalAgainstRejected = reports
+      .filter((report) => report.status === "rejected")
+      .reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
 
-    const reputation = (totalReports + totalFor - totalAgainst) * 10;
+    const reputation =
+      (totalReports + totalForResolved + totalAgainstRejected) * 10;
 
     return Math.max(0, reputation);
   };
