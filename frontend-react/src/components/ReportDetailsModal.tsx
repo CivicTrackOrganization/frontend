@@ -15,10 +15,10 @@ import { useReportVotes } from "../hooks/useReportVotes";
 import { createComment } from "../services/commentService";
 import { getReport, getReportStatusHistory } from "../services/reportService";
 import type { CommentCreationRequest } from "../types";
-import { displayDate, displayIsoString } from "../utils/dateUtils";
+import { displayIsoString } from "../utils/dateUtils";
+import { findReportStatusStyle } from "../utils/stylingUtils";
 import CommentSection from "./CommentSection";
 import ModeratorReportManagementSection from "./ModeratorReportManagementSection";
-import { findReportStatusStyle } from "../utils/stylingUtils";
 
 interface ReportDetailsProps {
   reportId: number;
