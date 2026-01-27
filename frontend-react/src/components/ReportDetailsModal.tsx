@@ -88,7 +88,7 @@ const ReportDetails = ({
       onClick={onClose}
     >
       <div
-        className="bg-white w-2/3 p-3 rounded-md h-3/4"
+        className="bg-white w-1/2 p-3 rounded-md h-3/4"
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -123,7 +123,7 @@ const ReportDetails = ({
               <section className="border-b border-b-gray-300 py-3">
                 {report.image && (
                   <img
-                    className="w-full h-full object-cover mb-2"
+                    className="w-3/4 mx-auto my-3 h-full object-cover mb-2"
                     src={report.image}
                     alt={report.title || "Report image"}
                   />
