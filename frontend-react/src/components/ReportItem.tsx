@@ -1,9 +1,13 @@
+import clsx from "clsx";
 import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
 import { PiChatCircle } from "react-icons/pi";
 import { useReportVotes } from "../hooks/useReportVotes";
 import type { Report } from "../types";
-import clsx from "clsx";
-import { displayDate } from "../utils/dateUtils";
+import { displayIsoString } from "../utils/dateUtils";
+import {
+  findPriorityStyle,
+  findReportStatusStyle,
+} from "../utils/stylingUtils";
 
 interface ReportItemProps {
   report: Report;
@@ -24,7 +28,12 @@ function ReportItem({ report, onClick }: ReportItemProps) {
             <span className="inline-block px-2 py-0.5 text-xs text-gray-700 bg-gray-100 rounded capitalize">
               {report.type}
             </span>
-            <span className="inline-block px-2 py-0.5 text-xs text-red-700 bg-red-100 rounded capitalize">
+            <span
+              className={clsx(
+                "inline-block px-2 py-0.5 text-xs rounded capitalize",
+                findPriorityStyle(report.priority),
+              )}
+            >
               {report.priority}
             </span>
           </div>
@@ -32,12 +41,17 @@ function ReportItem({ report, onClick }: ReportItemProps) {
           <p className="text-sm text-gray-600">{report.description}</p>
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
             <span>{report.location}</span>
-            <span>{displayDate(report.createdAt)}</span>
+            <span>{displayIsoString(report.createdAt)}</span>
           </div>
         </div>
         <div className="flex flex-col justify-between items-end gap-2 h-full">
-          <span className="px-3 py-1 text-xs text-yellow-800 bg-yellow-100 rounded capitalize">
-            {report.status}
+          <span
+            className={clsx(
+              "px-3 py-1 text-xs rounded capitalize",
+              findReportStatusStyle(report.status),
+            )}
+          >
+            {report.status.replaceAll("_", " ")}
           </span>
           <span className="py-1 text-xs text-gray-500">
             Author: {report.author}
@@ -49,7 +63,7 @@ function ReportItem({ report, onClick }: ReportItemProps) {
           <button
             className={clsx(
               "flex items-center gap-1 text-green-800 cursor-pointer hover:bg-green-50 transition-colors px-2 py-1 rounded-md",
-              report.userVoteType === 1 && "bg-green-50"
+              report.userVoteType === 1 && "bg-green-50",
             )}
             onClick={(e) => {
               e.stopPropagation();
@@ -63,7 +77,7 @@ function ReportItem({ report, onClick }: ReportItemProps) {
           <button
             className={clsx(
               "flex items-center gap-1 text-red-600 cursor-pointer hover:bg-red-50 transition-colors px-2 py-1 rounded-md",
-              report.userVoteType === -1 && "bg-red-50"
+              report.userVoteType === -1 && "bg-red-50",
             )}
             onClick={(e) => {
               e.stopPropagation();

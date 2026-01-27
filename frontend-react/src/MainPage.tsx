@@ -47,33 +47,48 @@ function MainPage() {
     retry: false,
   });
 
-  const calculateReputation = (reports: Report[] | undefined) => {
-   if (!reports) return 0;
+  const calculateReputation = () => {
+    if (!myReports && !allReports) return 0;
 
-   const totalReports = reports.length;
-   const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
-   const totalAgainst = reports.reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
+    const myReportsResolved = myReports
+      ? myReports.filter((report) => report.status === "resolved").length
+      : 0;
 
-   const reputation = (totalReports + totalFor - totalAgainst) * 10;
+    const totalForResolved = allReports
+      ? allReports
+          .filter((report) => report.status === "resolved")
+          .reduce((acc, r) => acc + (r.userVoteType === 1 ? 1 : 0), 0)
+      : 0;
 
-   return Math.max(0, reputation);
+    const totalAgainstRejected = allReports
+      ? allReports
+          .filter((report) => report.status === "rejected")
+          .reduce((acc, r) => acc + (r.userVoteType === -1 ? 1 : 0), 0)
+      : 0;
+
+    const reputation =
+      (myReportsResolved + totalForResolved + totalAgainstRejected) * 10;
+
+    return Math.max(0, reputation);
   };
 
-  const userReputation = calculateReputation(myReports);
+  const userReputation = calculateReputation();
 
   const user: User | null = userInfo
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
         reputation: userReputation,
-        role: "user",
+        role: userInfo.role,
       }
     : null;
 
   const currentReports = view === "all" ? allReports : myReports;
   const currentReportsLoading = view === "all" ? isLoadingAll : isLoadingMy;
 
-  const calculateResolvedReportsCount = (reports: Array<Report>) => {
-    return reports.filter((r) => r.status === "resolved").length;
+  const calculateFinishedReportsCount = (reports: Array<Report>) => {
+    return reports.filter(
+      (r) => r.status === "resolved" || r.status === "rejected",
+    ).length;
   };
 
   useEffect(() => {
@@ -97,53 +112,87 @@ function MainPage() {
         role={user.role}
       />
       <main className="p-6 mx-auto space-y-6 max-w-7xl">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {(() => {
-            return (
-              <>
-                <StatsCard title="Your reputation" value={user.reputation} />
-                {!isLoadingMy && !isErrorMy && myReports && (
-                  <StatsCard title="Your reports" value={myReports.length} />
-                )}
-                {!isLoadingAll && !isErrorAll && allReports && (
-                  <StatsCard
-                    title="Active reports"
-                    value={
-                      allReports.length -
-                      calculateResolvedReportsCount(allReports)
-                    }
-                  />
-                )}
-              </>
-            );
-          })()}
-        </div>
-
-        <div className="flex items-center justify-between p-6 text-white shadow-lg rounded-xl bg-linear-to-r from-indigo-600 to-purple-600">
-          <div>
-            <h2 className="text-2xl font-semibold">Report a new problem</h2>
-            <p className="text-sm opacity-90">
-              Help improve the city — report a problem in your area
-            </p>
+        {user.role === "citizen" ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <StatsCard title="Your reputation" value={user.reputation} />
+            {!isLoadingMy && !isErrorMy && myReports && (
+              <StatsCard title="Your reports" value={myReports.length} />
+            )}
+            {!isLoadingAll && !isErrorAll && allReports && (
+              <StatsCard
+                title="Active reports"
+                value={
+                  allReports.length - calculateFinishedReportsCount(allReports)
+                }
+              />
+            )}
           </div>
-          <button
-            onClick={() => setShowNewReport(true)}
-            className="px-4 py-2 text-indigo-700 bg-white rounded-lg shadow cursor-pointer hover:opacity-95"
-          >
-            New Report
-          </button>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-blue-700">New</p>
+              <p className="text-3xl font-bold text-blue-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "new").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-yellow-700 ">
+                In Progress
+              </p>
+              <p className="text-3xl font-bold text-yellow-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "in_progress").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-green-50 border border-green-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-green-700">Resolved</p>
+              <p className="text-3xl font-bold text-green-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "resolved").length
+                  : "-"}
+              </p>
+            </div>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-medium text-red-700 ">Rejected</p>
+              <p className="text-3xl font-bold text-red-900 mt-1">
+                {allReports
+                  ? allReports.filter((r) => r.status === "rejected").length
+                  : "-"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {user.role === "citizen" && (
+          <div className="flex items-center justify-between p-6 text-white shadow-lg rounded-xl bg-linear-to-r from-indigo-600 to-purple-600">
+            <div>
+              <h2 className="text-2xl font-semibold">Report a new problem</h2>
+              <p className="text-sm opacity-90">
+                Help improve the city — report a problem in your area
+              </p>
+            </div>
+            <button
+              onClick={() => setShowNewReport(true)}
+              className="px-4 py-2 text-indigo-700 bg-white rounded-lg shadow cursor-pointer hover:opacity-95"
+            >
+              New Report
+            </button>
+          </div>
+        )}
         {showNewReport && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 h-screen flex items-center justify-center">
             <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowNewReport(false)}
             />
-            <div 
+            <div
               className="relative w-11/12 max-w-5xl max-h-[90vh] overflow-y-auto mx-4 modal-scroll"
               style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
               }}
             >
               <div className="relative p-6 bg-white rounded-lg shadow-lg">
@@ -173,36 +222,38 @@ function MainPage() {
           </div>
         )}
         <div className="space-y-6">
-          <MapSection />
+          <MapSection isUserModerator={user.role === "moderator"} />
 
-          <div className="p-3 bg-white shadow-sm rounded-xl">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setView("all")}
-                    className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
-                      view === "all"
-                        ? "text-white bg-blue-600"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setView("mine")}
-                    className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
-                      view === "mine"
-                        ? "text-white bg-blue-600"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    My reports
-                  </button>
+          {user.role !== "moderator" && (
+            <div className="p-3 bg-white shadow-sm rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setView("all")}
+                      className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
+                        view === "all"
+                          ? "text-white bg-blue-600"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setView("mine")}
+                      className={`px-4 py-2 text-sm rounded-full cursor-pointer ${
+                        view === "mine"
+                          ? "text-white bg-blue-600"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      My reports
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div>
             {!currentReports ? (
@@ -224,6 +275,7 @@ function MainPage() {
           reportId={selectedReportId}
           onClose={() => setSelectedReportId(null)}
           userId={userInfo.id}
+          isUserModerator={user.role === "moderator"}
         />
       )}
     </div>

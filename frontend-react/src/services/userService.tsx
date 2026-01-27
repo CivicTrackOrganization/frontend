@@ -31,6 +31,7 @@ export interface UserInfo {
   email: string;
   firstName: string;
   lastName: string;
+  role: "citizen" | "moderator";
 }
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -43,7 +44,7 @@ export const signUp = async (data: SignUpRequest): Promise<SignUpResponse> => {
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
   return response.data;
 };
@@ -54,7 +55,7 @@ export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
     data,
     {
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response.data;
 };

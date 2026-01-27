@@ -1,5 +1,10 @@
 import { privateApi } from "../clients";
-import type { CreateReportRequest, Report, ReportDetailed } from "../types";
+import type {
+  CreateReportRequest,
+  Report,
+  ReportDetailed,
+  ReportStatus,
+} from "../types";
 import type { AxiosError } from "axios";
 
 export const getReport = async (reportId: number): Promise<ReportDetailed> => {
@@ -9,7 +14,7 @@ export const getReport = async (reportId: number): Promise<ReportDetailed> => {
 
 export const createReport = async (
   report: CreateReportRequest,
-  image: File | null
+  image: File | null,
 ): Promise<Report> => {
   const formData = new FormData();
 
@@ -17,7 +22,7 @@ export const createReport = async (
     if (key === "latitude" || key === "longitude") {
       return;
     }
-    
+
     if (value !== undefined) {
       formData.append(key, String(value));
     }
@@ -54,4 +59,13 @@ export const getReports = async (): Promise<Report[]> => {
 export const getMyReports = async (): Promise<Report[]> => {
   const res = await privateApi.get<Report[]>("/reports/me/");
   return res.data;
+};
+
+export const getReportStatusHistory = async (
+  reportId: number,
+): Promise<Array<ReportStatus>> => {
+  const response = await privateApi.get<Array<ReportStatus>>(
+    `/reports/${reportId}/history/`,
+  );
+  return response.data;
 };
