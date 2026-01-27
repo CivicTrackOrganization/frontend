@@ -15,7 +15,7 @@ import { useReportVotes } from "../hooks/useReportVotes";
 import { createComment } from "../services/commentService";
 import { getReport, getReportStatusHistory } from "../services/reportService";
 import type { CommentCreationRequest } from "../types";
-import { displayDate } from "../utils/dateUtils";
+import { displayDate, displayIsoString } from "../utils/dateUtils";
 import CommentSection from "./CommentSection";
 import ModeratorReportManagementSection from "./ModeratorReportManagementSection";
 
@@ -114,7 +114,7 @@ const ReportDetails = ({
                   {report.priority}
                 </span>
                 {report.assignedUnit && (
-                  <span className="px-3 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full border border-gray-200 dark:border-gray-600 flex items-center gap-1">
+                  <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs font-semibold rounded-full border border-gray-600 flex items-center gap-1">
                     Assigned: <strong>{report.assignedUnit}</strong>
                   </span>
                 )}
@@ -150,9 +150,9 @@ const ReportDetails = ({
                     <span>
                       Updated:{" "}
                       {reportStatusHistory?.length
-                        ? displayDate(
+                        ? displayIsoString(
                             reportStatusHistory[reportStatusHistory.length - 1]
-                              .modifiedAt,
+                              .createdAt,
                           )
                         : "Unknown"}
                     </span>
@@ -242,11 +242,11 @@ const ReportDetails = ({
                                 {reportStatus.moderatorComment}
                               </p>
                               <p className="text-xs mt-1">
-                                by {reportStatus.modifiedBy || report.author}
+                                by {reportStatus.modifiedBy}
                               </p>
                             </div>
                             <span className="text-xs whitespace-nowrap">
-                              {displayDate(reportStatus.modifiedAt)}
+                              {displayIsoString(reportStatus.createdAt)}
                             </span>
                           </div>
                         </div>

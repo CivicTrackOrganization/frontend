@@ -48,15 +48,18 @@ function MainPage() {
   });
 
   const calculateReputation = (reports: Report[] | undefined) => {
-   if (!reports) return 0;
+    if (!reports) return 0;
 
-   const totalReports = reports.length;
-   const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
-   const totalAgainst = reports.reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
+    const totalReports = reports.length;
+    const totalFor = reports.reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
+    const totalAgainst = reports.reduce(
+      (acc, r) => acc + (r.votesAgainst ?? 0),
+      0,
+    );
 
-   const reputation = (totalReports + totalFor - totalAgainst) * 10;
+    const reputation = (totalReports + totalFor - totalAgainst) * 10;
 
-   return Math.max(0, reputation);
+    return Math.max(0, reputation);
   };
 
   const userReputation = calculateReputation(myReports);
@@ -65,7 +68,7 @@ function MainPage() {
     ? {
         username: `${userInfo.firstName} ${userInfo.lastName}`,
         reputation: userReputation,
-        role: "user",
+        role: userInfo.role,
       }
     : null;
 
@@ -97,7 +100,7 @@ function MainPage() {
         role={user.role}
       />
       <main className="p-6 mx-auto space-y-6 max-w-7xl">
-        {user.role === "user" ? (
+        {user.role === "citizen" ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <StatsCard title="Your reputation" value={user.reputation} />
             {!isLoadingMy && !isErrorMy && myReports && (
@@ -151,7 +154,7 @@ function MainPage() {
           </div>
         )}
 
-        {user.role === "user" && (
+        {user.role === "citizen" && (
           <div className="flex items-center justify-between p-6 text-white shadow-lg rounded-xl bg-linear-to-r from-indigo-600 to-purple-600">
             <div>
               <h2 className="text-2xl font-semibold">Report a new problem</h2>
@@ -173,11 +176,11 @@ function MainPage() {
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowNewReport(false)}
             />
-            <div 
+            <div
               className="relative w-11/12 max-w-5xl max-h-[90vh] overflow-y-auto mx-4 modal-scroll"
               style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
               }}
             >
               <div className="relative p-6 bg-white rounded-lg shadow-lg">

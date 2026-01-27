@@ -10,6 +10,10 @@ export type AssignedUnit =
   | "environmental"
   | "general";
 
+export interface ErrorWithDetails {
+  detail: string;
+}
+
 export interface Report {
   id: number;
   title: string;
@@ -34,7 +38,7 @@ export interface ReportStatus {
   statusName: StatusType;
   moderatorComment: string;
   modifiedBy: string;
-  modifiedAt: string;
+  createdAt: string;
 }
 
 export interface Comment {
@@ -56,7 +60,7 @@ export interface ReportDetailed extends Report {
   comments: Array<Comment>;
 }
 
-export type UserRole = "user" | "moderator" | "admin";
+export type UserRole = "citizen" | "moderator" | "admin";
 
 export interface User {
   username: string;

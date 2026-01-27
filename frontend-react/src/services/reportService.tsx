@@ -64,20 +64,8 @@ export const getMyReports = async (): Promise<Report[]> => {
 export const getReportStatusHistory = async (
   reportId: number,
 ): Promise<Array<ReportStatus>> => {
-  const response: Array<ReportStatus> = [
-    {
-      statusName: "new",
-      moderatorComment: "",
-      modifiedBy: "",
-      modifiedAt: "2026-01-23",
-    },
-    {
-      statusName: "in_progress",
-      moderatorComment: "Report approved",
-      modifiedBy: "John Smith",
-      modifiedAt: "2026-01-24",
-    },
-  ];
-  console.log("fetching report status history for report", reportId);
-  return response;
+  const response = await privateApi.get<Array<ReportStatus>>(
+    `/reports/${reportId}/history/`,
+  );
+  return response.data;
 };

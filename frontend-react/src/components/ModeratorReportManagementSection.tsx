@@ -1,14 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import {
-  assignReportUnit,
-  modifyReportStatus,
-  publishOfficialResponse,
-} from "../services/moderatorService";
-import type { AssignedUnit, StatusType } from "../types";
-import clsx from "clsx";
 import { FaRegFileAlt } from "react-icons/fa";
+import { changeReportStatus } from "../services/moderatorService";
+import type { AssignedUnit, ErrorWithDetails, StatusType } from "../types";
+import type { AxiosError } from "axios";
 
 interface ModeratorReportManagementSectionProps {
   reportId: number;
@@ -19,40 +16,24 @@ const ModeratorReportManagementSection = ({
 }: ModeratorReportManagementSectionProps) => {
   const queryClient = useQueryClient();
 
-  const changeStatusMutation = useMutation({
-    mutationFn: () => modifyReportStatus(reportId, statusOption!),
+  const sendModeratorAction = useMutation({
+    mutationFn: () =>
+      changeReportStatus(reportId, {
+        status: statusOption!,
+        comment: officialResponseContent,
+        assignedUnit: assignedUnit,
+      }),
     onSuccess: () => {
-      toast.success("Successfully modified report status.");
-      queryClient.invalidateQueries({ queryKey: ["report", reportId] });
+      toast.success("Successfully changed report status.");
       queryClient.invalidateQueries({
         queryKey: ["reportStatusHistory", reportId],
       });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
-    onError: () => {
-      toast.error("Failed to modify report status. Please try again.");
-    },
-  });
-
-  const assignReportUnitMutation = useMutation({
-    mutationFn: () => assignReportUnit(reportId, assignedUnit!),
-    onSuccess: () => {
-      toast.success("Successfully assigned report to the unit.");
-      queryClient.invalidateQueries({ queryKey: ["report", reportId] });
-    },
-    onError: () => {
-      toast.error("Failed to assign report to the unit. Please try again.");
-    },
-  });
-
-  const sendOfficialResponse = useMutation({
-    mutationFn: () =>
-      publishOfficialResponse(reportId, officialResponseContent),
-    onSuccess: () => {
-      toast.success("Successfully published official response.");
-      queryClient.invalidateQueries({ queryKey: ["report", reportId] });
-    },
-    onError: () => {
-      toast.error("Failed to publish official response. Please try again.");
+    onError: (e: AxiosError<ErrorWithDetails>) => {
+      if (e.response && e.response.status === 400)
+        toast.error(e.response.data.detail);
+      else toast.error("Failed to change report status.");
     },
   });
 
@@ -79,23 +60,19 @@ const ModeratorReportManagementSection = ({
     setAssignedUnit(newValue);
   };
 
-  const handleStatusOptionChangedEvent = () => {
-    if (!statusOption) toast.error("Please select a status before modifying");
-    if (!statusOption || changeStatusMutation.isPending) return;
-    changeStatusMutation.mutate();
-  };
+  const handleModeratorAction = () => {
+    if (!statusOption) {
+      toast.error("Please select a status option.");
+      return;
+    }
 
-  const handleAssignedUnitEvent = () => {
-    if (!assignedUnit) toast.error("Please select a unit before assigning");
-    if (!assignedUnit || assignReportUnitMutation.isPending) return;
-    assignReportUnitMutation.mutate();
-  };
+    if (!officialResponseContent.trim()) {
+      toast.error("Please provide an official response.");
+      return;
+    }
 
-  const handleOfficialResponsePublishment = () => {
-    if (!officialResponseContent.trim())
-      toast.error("Official response content cannot be empty");
-    if (!officialResponseContent || sendOfficialResponse.isPending) return;
-    sendOfficialResponse.mutate();
+    if (sendModeratorAction.isPending) return;
+    sendModeratorAction.mutate();
   };
 
   return (
@@ -122,12 +99,6 @@ const ModeratorReportManagementSection = ({
               <option value="resolved">Resolved</option>
               <option value="rejected">Rejected</option>
             </select>
-            <button
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm cursor-pointer"
-              onClick={handleStatusOptionChangedEvent}
-            >
-              Modify
-            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
@@ -151,12 +122,6 @@ const ModeratorReportManagementSection = ({
               <option value="police">Police</option>
               <option value="general">General</option>
             </select>
-            <button
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm cursor-pointer"
-              onClick={handleAssignedUnitEvent}
-            >
-              Assign
-            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
@@ -173,10 +138,10 @@ const ModeratorReportManagementSection = ({
             ></textarea>
             <button
               className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm cursor-pointer"
-              onClick={handleOfficialResponsePublishment}
+              onClick={handleModeratorAction}
             >
               <FaRegFileAlt />
-              Publish response
+              Publish
             </button>
           </div>
         </div>

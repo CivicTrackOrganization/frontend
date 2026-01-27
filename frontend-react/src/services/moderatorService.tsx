@@ -1,26 +1,30 @@
+import { privateApi } from "../clients";
 import type { AssignedUnit, StatusType } from "../types";
+export interface ChangeReportStatusRequest {
+  status: StatusType;
+  comment: string;
+  assignedUnit?: AssignedUnit;
+}
 
-export const modifyReportStatus = async (
+export const changeReportStatus = async (
   reportId: number,
-  newStatus: StatusType,
+  changeReportStatusRequest: ChangeReportStatusRequest,
 ) => {
-  throw new Error(
-    `modifyReportStatus not implemented for report ${reportId} (${newStatus})`,
+  const formData = new FormData();
+  formData.append("status", changeReportStatusRequest.status);
+  formData.append("comment", changeReportStatusRequest.comment);
+  if (changeReportStatusRequest.assignedUnit) {
+    formData.append("assignedUnit", changeReportStatusRequest.assignedUnit);
+  }
+
+  const response = await privateApi.post(
+    `/reports/${reportId}/change_status/`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
   );
-};
-export const assignReportUnit = async (
-  reportId: number,
-  assignedUnit: AssignedUnit,
-) => {
-  throw new Error(
-    `assignReportUnit not implemented for report ${reportId} (${assignedUnit})`,
-  );
-};
-export const publishOfficialResponse = async (
-  reportId: number,
-  responseContent: string,
-) => {
-  throw new Error(
-    `publishOfficialResponse not implemented for report ${reportId}: ${responseContent}`,
-  );
+  return response.data;
 };
