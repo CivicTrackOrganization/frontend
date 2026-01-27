@@ -47,27 +47,32 @@ function MainPage() {
     retry: false,
   });
 
-  const calculateReputation = (reports: Report[] | undefined) => {
-    if (!reports) return 0;
+  const calculateReputation = () => {
+    if (!myReports && !allReports) return 0;
 
-    const totalReports = reports.filter(
-      (report) =>
-        report.status === "resolved" || report.status === "in_progress",
-    ).length;
-    const totalForResolved = reports
-      .filter((report) => report.status === "resolved")
-      .reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
-    const totalAgainstRejected = reports
-      .filter((report) => report.status === "rejected")
-      .reduce((acc, r) => acc + (r.votesAgainst ?? 0), 0);
+    const myReportsResolved = myReports
+      ? myReports.filter((report) => report.status === "resolved").length
+      : 0;
+
+    const totalForResolved = allReports
+      ? allReports
+          .filter((report) => report.status === "resolved")
+          .reduce((acc, r) => acc + (r.userVoteType === 1 ? 1 : 0), 0)
+      : 0;
+
+    const totalAgainstRejected = allReports
+      ? allReports
+          .filter((report) => report.status === "rejected")
+          .reduce((acc, r) => acc + (r.userVoteType === -1 ? 1 : 0), 0)
+      : 0;
 
     const reputation =
-      (totalReports + totalForResolved + totalAgainstRejected) * 10;
+      (myReportsResolved + totalForResolved + totalAgainstRejected) * 10;
 
     return Math.max(0, reputation);
   };
 
-  const userReputation = calculateReputation(myReports);
+  const userReputation = calculateReputation();
 
   const user: User | null = userInfo
     ? {
