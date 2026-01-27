@@ -50,7 +50,10 @@ function MainPage() {
   const calculateReputation = (reports: Report[] | undefined) => {
     if (!reports) return 0;
 
-    const totalReports = reports.length;
+    const totalReports = reports.filter(
+      (report) =>
+        report.status === "resolved" || report.status === "in_progress",
+    ).length;
     const totalForResolved = reports
       .filter((report) => report.status === "resolved")
       .reduce((acc, r) => acc + (r.votesFor ?? 0), 0);
@@ -77,8 +80,10 @@ function MainPage() {
   const currentReports = view === "all" ? allReports : myReports;
   const currentReportsLoading = view === "all" ? isLoadingAll : isLoadingMy;
 
-  const calculateResolvedReportsCount = (reports: Array<Report>) => {
-    return reports.filter((r) => r.status === "resolved").length;
+  const calculateFinishedReportsCount = (reports: Array<Report>) => {
+    return reports.filter(
+      (r) => r.status === "resolved" || r.status === "rejected",
+    ).length;
   };
 
   useEffect(() => {
@@ -112,7 +117,7 @@ function MainPage() {
               <StatsCard
                 title="Active reports"
                 value={
-                  allReports.length - calculateResolvedReportsCount(allReports)
+                  allReports.length - calculateFinishedReportsCount(allReports)
                 }
               />
             )}
@@ -173,7 +178,7 @@ function MainPage() {
           </div>
         )}
         {showNewReport && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 h-screen flex items-center justify-center">
             <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowNewReport(false)}

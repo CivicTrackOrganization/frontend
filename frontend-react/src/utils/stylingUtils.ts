@@ -10,6 +10,8 @@ export const findReportStatusStyle = (status: StatusType) => {
       return "bg-red-100 text-red-800 border-red-200";
     case "resolved":
       return "bg-green-100 text-green-800 border-green-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 };
 
@@ -21,5 +23,7 @@ export const findPriorityStyle = (priority: PriorityType) => {
       return "text-amber-700 bg-amber-100";
     case "high":
       return "text-red-700 bg-red-100";
+    default:
+      return "text-gray-700 bg-gray-100";
   }
 };
