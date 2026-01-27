@@ -1,26 +1,31 @@
-import React, { useRef, useEffect, useCallback, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { Report, ReportType } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getReports } from "../services/reportService";
+import type { Report, ReportType } from "../types";
 
 const typeColorMap: Record<ReportType, string> = {
   infrastructure: "#FFD300",
   safety: "#FF3131",
   environment: "#3CB043",
-  other: "#8e8e8e"
+  other: "#8e8e8e",
 };
 
 const defaultCoords: [number, number] = [19.906864041831486, 50.03011538986579];
 
-const MapSection: React.FC = () => {
+interface MapSectionProps {
+  isUserModerator: boolean;
+}
+
+const MapSection = ({ isUserModerator }: MapSectionProps) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   const [reports, setReports] = useState<Report[]>([]);
-  const [userPosition, setUserPosition] = useState<[number, number]>(defaultCoords);
+  const [userPosition, setUserPosition] =
+    useState<[number, number]>(defaultCoords);
   const [radius, setRadius] = useState<number>(500);
   const [mapCentered, setMapCentered] = useState(false);
 
@@ -41,7 +46,7 @@ const MapSection: React.FC = () => {
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: defaultCoords,
-      zoom: 10
+      zoom: 10,
     });
 
     const marker = new mapboxgl.Marker({ color: "purple" })
@@ -58,23 +63,26 @@ const MapSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-  const id = setTimeout(() => {
-    fetchReports();
-  }, 0);
+    const id = setTimeout(() => {
+      fetchReports();
+    }, 0);
 
-  const interval = setInterval(fetchReports, 3000);
-  return () => {
-    clearTimeout(id);
-    clearInterval(interval);
-  };
-}, [fetchReports]);
+    const interval = setInterval(fetchReports, 3000);
+    return () => {
+      clearTimeout(id);
+      clearInterval(interval);
+    };
+  }, [fetchReports]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
 
     const watch = navigator.geolocation.watchPosition(
       (pos) => {
-        const newPos: [number, number] = [pos.coords.longitude, pos.coords.latitude];
+        const newPos: [number, number] = [
+          pos.coords.longitude,
+          pos.coords.latitude,
+        ];
         setUserPosition(newPos);
 
         if (mapRef.current && userMarkerRef.current) {
@@ -86,13 +94,18 @@ const MapSection: React.FC = () => {
         }
       },
       (err) => console.warn("No location:", err),
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     );
 
     return () => navigator.geolocation.clearWatch(watch);
   }, [mapCentered]);
 
-  const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
+  const getDistance = (
+    lng1: number,
+    lat1: number,
+    lng2: number,
+    lat2: number,
+  ) => {
     const R = 6371000;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lng2 - lng1) * Math.PI) / 180;
@@ -114,16 +127,20 @@ const MapSection: React.FC = () => {
     reports
       .filter((r) => r.latitude && r.longitude)
       .filter((r) => {
+        if (isUserModerator) return true;
         const distance = getDistance(
-          userPosition[0], userPosition[1],
-          r.longitude!, r.latitude!
+          userPosition[0],
+          userPosition[1],
+          r.longitude!,
+          r.latitude!,
         );
         return distance <= radius;
       })
       .forEach((r) => {
-        const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false }).setHTML(
-          `<strong>${r.title}</strong><br/>${r.description ?? ""}`
-        );
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+        }).setHTML(`<strong>${r.title}</strong><br/>${r.description ?? ""}`);
 
         const marker = new mapboxgl.Marker({ color: typeColorMap[r.type] })
           .setLngLat([r.longitude!, r.latitude!])
@@ -136,22 +153,24 @@ const MapSection: React.FC = () => {
 
         markersRef.current.push(marker);
       });
-  }, [reports, userPosition, radius]);
+  }, [reports, userPosition, radius, isUserModerator]);
 
   return (
     <div>
-      <div style={{ marginBottom: 10 }}>
-        <label>Filter radius: {radius} m</label>
-        <input
-          type="range"
-          min={100}
-          max={5000}
-          step={50}
-          value={radius}
-          onChange={(e) => setRadius(Number(e.target.value))}
-          style={{ width: "100%" }}
-        />
-      </div>
+      {!isUserModerator && (
+        <div style={{ marginBottom: 10 }}>
+          <label>Filter radius: {radius} m</label>
+          <input
+            type="range"
+            min={100}
+            max={5000}
+            step={50}
+            value={radius}
+            onChange={(e) => setRadius(Number(e.target.value))}
+            style={{ width: "100%" }}
+          />
+        </div>
+      )}
       <div ref={mapContainerRef} style={{ width: "100%", height: "400px" }} />
     </div>
   );

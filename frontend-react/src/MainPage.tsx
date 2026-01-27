@@ -222,7 +222,7 @@ function MainPage() {
           </div>
         )}
         <div className="space-y-6">
-          <MapSection />
+          <MapSection isUserModerator={user.role === "moderator"} />
 
           {user.role !== "moderator" && (
             <div className="p-3 bg-white shadow-sm rounded-xl">

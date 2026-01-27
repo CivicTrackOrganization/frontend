@@ -14,7 +14,7 @@ export const changeReportStatus = async (
   formData.append("status", changeReportStatusRequest.status);
   formData.append("comment", changeReportStatusRequest.comment);
   if (changeReportStatusRequest.assignedUnit) {
-    formData.append("assignedUnit", changeReportStatusRequest.assignedUnit);
+    formData.append("assigned_unit", changeReportStatusRequest.assignedUnit);
   }
 
   const response = await privateApi.post(
